@@ -1,0 +1,73 @@
+[gd_scene load_steps=8 format=3 uid="uid://q8xj1wuvbqjy"]
+
+[ext_resource type="StyleBox" uid="uid://dq0xfw8w26qky" path="res://style_button_add_normal.tres" id="1_acemj"]
+[ext_resource type="Script" path="res://UserDefinedLocationClickerConditionEditor.cs" id="1_hqyjk"]
+[ext_resource type="StyleBox" uid="uid://dl662aviveegt" path="res://style_button_add_hover.tres" id="2_6ywx6"]
+[ext_resource type="StyleBox" uid="uid://cv5fbery1a8ku" path="res://style_button_add_pressed.tres" id="3_cmmrs"]
+[ext_resource type="StyleBox" uid="uid://df2dn7glohbc7" path="res://style_button_edit_normal.tres" id="4_k8s8b"]
+[ext_resource type="StyleBox" uid="uid://dwbqgg6c8m5ab" path="res://style_button_edit_hover.tres" id="5_2pipa"]
+[ext_resource type="StyleBox" uid="uid://bvphimrmugqlt" path="res://style_button_edit_pressed.tres" id="6_n22h2"]
+
+[node name="VBoxContainer" type="VBoxContainer" node_paths=PackedStringArray("OscPathEdit", "ConditionMenuSelect", "ThresholdEdit", "ButtonAdd", "ButtonEdit")]
+script = ExtResource("1_hqyjk")
+OscPathEdit = NodePath("LineEdit")
+ConditionMenuSelect = NodePath("HBoxContainer/MenuButton")
+ThresholdEdit = NodePath("HBoxContainer/LineEdit")
+ButtonAdd = NodePath("AddButton")
+ButtonEdit = NodePath("EditButton")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Path"
+
+[node name="LineEdit" type="LineEdit" parent="."]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 2
+text = "Condition"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="MenuButton" type="OptionButton" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 4
+selected = 0
+popup/item_0/text = "="
+popup/item_0/id = 0
+popup/item_1/text = "≠"
+popup/item_1/id = 1
+popup/item_2/text = ">="
+popup/item_2/id = 2
+popup/item_3/text = "<="
+popup/item_3/id = 3
+
+[node name="LineEdit" type="LineEdit" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+virtual_keyboard_type = 2
+
+[node name="Control" type="Control" parent="."]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+
+[node name="AddButton" type="Button" parent="."]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_styles/normal = ExtResource("1_acemj")
+theme_override_styles/hover = ExtResource("2_6ywx6")
+theme_override_styles/pressed = ExtResource("3_cmmrs")
+theme_override_styles/focus = ExtResource("2_6ywx6")
+text = "Add"
+
+[node name="EditButton" type="Button" parent="."]
+visible = false
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_styles/normal = ExtResource("4_k8s8b")
+theme_override_styles/hover = ExtResource("5_2pipa")
+theme_override_styles/pressed = ExtResource("6_n22h2")
+theme_override_styles/focus = ExtResource("6_n22h2")
+text = "Edit"

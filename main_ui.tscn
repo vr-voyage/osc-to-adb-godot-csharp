@@ -1,0 +1,145 @@
+[gd_scene load_steps=13 format=3 uid="uid://dx4u3krvfuivl"]
+
+[ext_resource type="Script" path="res://MainUi.cs" id="1_wgdd4"]
+[ext_resource type="Script" path="res://ScaledTextureRect.cs" id="2_j7xl4"]
+[ext_resource type="Script" path="res://MainLogger.cs" id="2_nlsio"]
+[ext_resource type="Script" path="res://OscServer.cs" id="3_0kln7"]
+[ext_resource type="Script" path="res://UserDefinedOscClickers.cs" id="3_3yooh"]
+[ext_resource type="PackedScene" uid="uid://dglu0kapordf4" path="res://ClickTack.tscn" id="4_riyqx"]
+[ext_resource type="Script" path="res://DisplayOscMap.cs" id="5_k4j6m"]
+[ext_resource type="PackedScene" uid="uid://cfvmikemaij8q" path="res://ui_osc_condition_display.tscn" id="6_01eg1"]
+[ext_resource type="PackedScene" uid="uid://br7g8kmwf1jhd" path="res://DisplayOscValue.tscn" id="6_i76b5"]
+[ext_resource type="PackedScene" uid="uid://q8xj1wuvbqjy" path="res://osc_clicker_condition_editor.tscn" id="7_crfgw"]
+[ext_resource type="Script" path="res://StatusBar.cs" id="11_0kkfd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_348sj"]
+bg_color = Color(0.0338533, 0.0338533, 0.0338532, 1)
+
+[node name="Control" type="Control" node_paths=PackedStringArray("screenOutput", "statusOutput", "OscServer", "clickerSetter")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_wgdd4")
+adbExe = "C:/Program Files/Unity/Hub/Editor/2022.3.21f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe"
+screenOutput = NodePath("VBoxContainer3/HBoxContainer/TextureRect")
+statusOutput = NodePath("VBoxContainer3/VBoxContainer2/StatusBar")
+OscServer = NodePath("OscServer")
+clickerSetter = NodePath("VBoxContainer3/HBoxContainer/TextureRect/ClickLocationSetter")
+
+[node name="Logger" type="Control" parent="."]
+anchors_preset = 0
+script = ExtResource("2_nlsio")
+
+[node name="OscServer" type="Control" parent="."]
+process_mode = 3
+layout_mode = 2
+anchors_preset = 0
+script = ExtResource("3_0kln7")
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="PanelContainer" parent="VBoxContainer3"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="TakeScreenshot" type="Button" parent="VBoxContainer3/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Take Screenshot"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer3"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer3/HBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+expand_mode = 2
+stretch_mode = 5
+script = ExtResource("2_j7xl4")
+
+[node name="ClickLocationSetter" parent="VBoxContainer3/HBoxContainer/TextureRect" instance=ExtResource("4_riyqx")]
+visible = false
+layout_mode = 0
+mouse_filter = 1
+
+[node name="Control" type="Control" parent="VBoxContainer3/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer3/HBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_348sj")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "Clickers"
+horizontal_alignment = 1
+
+[node name="OscClickers" type="VBoxContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer" node_paths=PackedStringArray("ClickLocationSetter")]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("3_3yooh")
+OscClickerDisplay = ExtResource("6_01eg1")
+ClickLocationSetter = NodePath("../../../TextureRect/ClickLocationSetter")
+
+[node name="Panel" type="PanelContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel"]
+layout_mode = 2
+
+[node name="OscActionConditionEditor" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer" instance=ExtResource("7_crfgw")]
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer3/HBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="DisplayValuesRead" type="VBoxContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer/ScrollContainer" node_paths=PackedStringArray("server")]
+layout_mode = 2
+script = ExtResource("5_k4j6m")
+valueDisplayer = ExtResource("6_i76b5")
+server = NodePath("../../../../../OscServer")
+
+[node name="VBoxContainer2" type="PanelContainer" parent="VBoxContainer3"]
+layout_mode = 2
+
+[node name="StatusBar" type="Label" parent="VBoxContainer3/VBoxContainer2"]
+layout_mode = 2
+horizontal_alignment = 2
+script = ExtResource("11_0kkfd")
+
+[connection signal="LogMessageAdded" from="Logger" to="VBoxContainer3/VBoxContainer2/StatusBar" method="ShowMessage"]
+[connection signal="OscValuesUpdated" from="OscServer" to="VBoxContainer3/HBoxContainer/PanelContainer/ScrollContainer/DisplayValuesRead" method="DisplayMap"]
+[connection signal="pressed" from="VBoxContainer3/VBoxContainer/TakeScreenshot" to="." method="_TriggerScreenshot"]
+[connection signal="gui_input" from="VBoxContainer3/HBoxContainer/TextureRect" to="." method="_OnScreenClicked"]
+[connection signal="SelectionChanged" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" to="VBoxContainer3/HBoxContainer/TextureRect/ClickLocationSetter" method="SelectedClickerChanged"]
+[connection signal="SelectionChanged" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" method="CurrentSelectionChanged"]
+[connection signal="AddOscClicker" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" method="Add"]
+[connection signal="ValuesEdited" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" method="ValueEdited"]

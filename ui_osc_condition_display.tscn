@@ -1,0 +1,45 @@
+[gd_scene load_steps=4 format=3 uid="uid://cfvmikemaij8q"]
+
+[ext_resource type="StyleBox" uid="uid://bmgytth3qo0mt" path="res://display_style_not_selected.tres" id="1_6fb4v"]
+[ext_resource type="Script" path="res://UserDefinedLocationClickerDisplay.cs" id="1_dd5gu"]
+[ext_resource type="StyleBox" uid="uid://t6fdc4b7ace5" path="res://display_style_selected.tres" id="3_up5jo"]
+
+[node name="HBoxContainer" type="PanelContainer" node_paths=PackedStringArray("colorRect", "oscPathText", "conditionText", "thresholdText")]
+theme_override_styles/panel = ExtResource("1_6fb4v")
+script = ExtResource("1_dd5gu")
+colorRect = NodePath("HBoxContainer/ColorRect")
+oscPathText = NodePath("HBoxContainer/VBoxContainer/Path")
+conditionText = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/Label")
+thresholdText = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/Label2")
+SelectedStyle = ExtResource("3_up5jo")
+NotSelectedStyle = ExtResource("1_6fb4v")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="CheckBox" type="CheckBox" parent="HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Path" type="Label" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[connection signal="toggled" from="HBoxContainer/CheckBox" to="." method="OnCheckBoxToggled"]

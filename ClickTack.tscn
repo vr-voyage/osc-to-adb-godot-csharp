@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://dglu0kapordf4"]
+
+[ext_resource type="Script" path="res://UserDefinedOscClickerSetter.cs" id="1_831g2"]
+
+[node name="TextureRect" type="ColorRect"]
+custom_minimum_size = Vector2(16, 16)
+offset_right = 16.0
+offset_bottom = 16.0
+pivot_offset = Vector2(8, 8)
+script = ExtResource("1_831g2")
+
+[connection signal="gui_input" from="." to="." method="OnGuiEvent"]

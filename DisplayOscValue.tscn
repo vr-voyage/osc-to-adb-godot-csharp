@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3 uid="uid://br7g8kmwf1jhd"]
+
+[ext_resource type="Script" path="res://DisplayOscValue.cs" id="1_t12gn"]
+
+[node name="PanelContainer" type="PanelContainer" node_paths=PackedStringArray("uiValueName", "uiValue")]
+script = ExtResource("1_t12gn")
+uiValueName = NodePath("MarginContainer/VBoxContainer/Label")
+uiValue = NodePath("MarginContainer/VBoxContainer/Label2")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.999016, 0.815579, 0.675185, 1)
+theme_override_colors/font_shadow_color = Color(0.554169, 0.300678, 0.00824557, 1)
+theme_override_font_sizes/font_size = 16
+text = "ABC"
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
