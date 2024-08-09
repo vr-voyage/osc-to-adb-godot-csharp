@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://dx4u3krvfuivl"]
+[gd_scene load_steps=14 format=3 uid="uid://dx4u3krvfuivl"]
 
-[ext_resource type="Script" path="res://MainUi.cs" id="1_wgdd4"]
+[ext_resource type="Script" path="res://MainPart.cs" id="1_p4x5r"]
 [ext_resource type="Script" path="res://ScaledTextureRect.cs" id="2_j7xl4"]
 [ext_resource type="Script" path="res://MainLogger.cs" id="2_nlsio"]
 [ext_resource type="Script" path="res://OscServer.cs" id="3_0kln7"]
 [ext_resource type="Script" path="res://UserDefinedOscClickers.cs" id="3_3yooh"]
+[ext_resource type="Script" path="res://AdbHandler.cs" id="3_4h4rp"]
 [ext_resource type="PackedScene" uid="uid://dglu0kapordf4" path="res://ClickTack.tscn" id="4_riyqx"]
 [ext_resource type="Script" path="res://DisplayOscMap.cs" id="5_k4j6m"]
 [ext_resource type="PackedScene" uid="uid://cfvmikemaij8q" path="res://ui_osc_condition_display.tscn" id="6_01eg1"]
@@ -15,7 +16,7 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_348sj"]
 bg_color = Color(0.0338533, 0.0338533, 0.0338532, 1)
 
-[node name="Control" type="Control" node_paths=PackedStringArray("screenOutput", "statusOutput", "OscServer", "clickerSetter")]
+[node name="MainApp" type="Control" node_paths=PackedStringArray("AdbHandler", "OscServer")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,22 +24,28 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("1_wgdd4")
-adbExe = "C:/Program Files/Unity/Hub/Editor/2022.3.21f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe"
-screenOutput = NodePath("VBoxContainer3/HBoxContainer/TextureRect")
-statusOutput = NodePath("VBoxContainer3/VBoxContainer2/StatusBar")
+script = ExtResource("1_p4x5r")
+AdbHandler = NodePath("AdbHandler")
 OscServer = NodePath("OscServer")
-clickerSetter = NodePath("VBoxContainer3/HBoxContainer/TextureRect/ClickLocationSetter")
 
 [node name="Logger" type="Control" parent="."]
 anchors_preset = 0
 script = ExtResource("2_nlsio")
 
-[node name="OscServer" type="Control" parent="."]
+[node name="OscServer" type="Control" parent="." node_paths=PackedStringArray("Logger")]
 process_mode = 3
 layout_mode = 2
 anchors_preset = 0
 script = ExtResource("3_0kln7")
+Logger = NodePath("../Logger")
+
+[node name="AdbHandler" type="Control" parent="." node_paths=PackedStringArray("screenOutput", "StatusBar")]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_4h4rp")
+screenOutput = NodePath("../VBoxContainer3/HBoxContainer/PhoneScreen")
+StatusBar = NodePath("../VBoxContainer3/VBoxContainer2/StatusBar")
 
 [node name="VBoxContainer3" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -63,7 +70,7 @@ layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer3/HBoxContainer"]
+[node name="PhoneScreen" type="TextureRect" parent="VBoxContainer3/HBoxContainer"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 4
@@ -73,10 +80,11 @@ expand_mode = 2
 stretch_mode = 5
 script = ExtResource("2_j7xl4")
 
-[node name="ClickLocationSetter" parent="VBoxContainer3/HBoxContainer/TextureRect" instance=ExtResource("4_riyqx")]
+[node name="ClickLocationSetter" parent="VBoxContainer3/HBoxContainer/PhoneScreen" node_paths=PackedStringArray("PhoneScreen") instance=ExtResource("4_riyqx")]
 visible = false
 layout_mode = 0
 mouse_filter = 1
+PhoneScreen = NodePath("..")
 
 [node name="Control" type="Control" parent="VBoxContainer3/HBoxContainer"]
 layout_mode = 2
@@ -102,7 +110,7 @@ layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("3_3yooh")
 OscClickerDisplay = ExtResource("6_01eg1")
-ClickLocationSetter = NodePath("../../../TextureRect/ClickLocationSetter")
+ClickLocationSetter = NodePath("../../../PhoneScreen/ClickLocationSetter")
 
 [node name="Panel" type="PanelContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer"]
 layout_mode = 2
@@ -136,10 +144,13 @@ horizontal_alignment = 2
 script = ExtResource("11_0kkfd")
 
 [connection signal="LogMessageAdded" from="Logger" to="VBoxContainer3/VBoxContainer2/StatusBar" method="ShowMessage"]
+[connection signal="OscValuesUpdated" from="OscServer" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="OscValuesChanged"]
 [connection signal="OscValuesUpdated" from="OscServer" to="VBoxContainer3/HBoxContainer/PanelContainer/ScrollContainer/DisplayValuesRead" method="DisplayMap"]
-[connection signal="pressed" from="VBoxContainer3/VBoxContainer/TakeScreenshot" to="." method="_TriggerScreenshot"]
-[connection signal="gui_input" from="VBoxContainer3/HBoxContainer/TextureRect" to="." method="_OnScreenClicked"]
-[connection signal="SelectionChanged" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" to="VBoxContainer3/HBoxContainer/TextureRect/ClickLocationSetter" method="SelectedClickerChanged"]
+[connection signal="pressed" from="VBoxContainer3/VBoxContainer/TakeScreenshot" to="AdbHandler" method="_TriggerScreenshotAdb"]
+[connection signal="Rescaled" from="VBoxContainer3/HBoxContainer/PhoneScreen" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="ReloadResource"]
+[connection signal="gui_input" from="VBoxContainer3/HBoxContainer/PhoneScreen" to="." method="_OnScreenClicked"]
+[connection signal="ClickTriggered" from="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" to="AdbHandler" method="ClickTriggered"]
+[connection signal="SelectionChanged" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="SelectedClickerChanged"]
 [connection signal="SelectionChanged" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" method="CurrentSelectionChanged"]
 [connection signal="AddOscClicker" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" method="Add"]
 [connection signal="ValuesEdited" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" method="ValueEdited"]

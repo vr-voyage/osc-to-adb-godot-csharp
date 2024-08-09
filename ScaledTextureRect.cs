@@ -3,7 +3,10 @@ using System;
 
 public partial class ScaledTextureRect : TextureRect
 {
+	[Signal]
+	public delegate void RescaledEventHandler();
 
+	public Vector2 CurrentScale {get; set;}
 	public Vector2 ReverseScale {get; set;}
 
 	public void ApplyAndScaleTexture(Texture2D newTexture)
@@ -20,8 +23,12 @@ public partial class ScaledTextureRect : TextureRect
 
 		CustomMinimumSize = textureSize * proportionalScale;
 		Texture = newTexture;
+
+		CurrentScale = proportionalScale;
 		ReverseScale = Vector2.One / proportionalScale;
 		Visible = true;
 	}
+
+	
 
 }

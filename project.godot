@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="AdbGodotSharp"
-run/main_scene="res://main_ui.tscn"
+run/main_scene="res://main_app.tscn"
 config/features=PackedStringArray("4.2", "C#", "Mobile")
 config/icon="res://icon.svg"
 

@@ -6,6 +6,7 @@ public partial class OscServer : Control
 {
 	delegate Variant OscPartParser(byte[] packet, int cursor);
 	delegate int SizeEvaluator(Variant value);
+
 	OscValuesRead OscValues { get; set; } = new OscValuesRead();
 
 	[Export]
@@ -19,25 +20,49 @@ public partial class OscServer : Control
 
 	void Log(string message)
 	{
-		if (Logger != null)
-		{
-            Logger.LogMessage($"[OscServer] {message}");
-        }
-    }
+		Logger?.LogMessage($"[OscServer] {message}");
+	}
 
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
+
+	public void StartServer()
 	{
+		Server ??= new UdpServer();
+
 		if (Server.Listen(9001, "127.0.0.1") != Error.Ok)
 		{
 			Log("Could not listen on port 9001");
+			StopServer();
+			return;
 		}
+
+		SetProcess(true);
+	}
+
+	public void StopServer()
+	{
+		Server?.Stop();
+		SetProcess(false);
+	}
+
+	public void SetSettings(UserMainSettingsResource settings)
+	{
+		if (settings != null) { StartServer(); } else {	StopServer(); }
+	}
+
+	public override void _ExitTree()
+	{
+		StopServer();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-
+		if (!Server.IsListening())
+		{
+			Log("Server not listening");
+			SetProcess(false);
+			return;
+		}
 		if (Server.Poll() != Error.Ok)
 		{
 			Log("Polling failed");
@@ -66,7 +91,7 @@ public partial class OscServer : Control
 			GD.Print("Got some OSC Values !");
 			EmitSignal(SignalName.OscValuesUpdated, OscValues);
 		}
-		GD.Print("Main UDP Server loop");
+
 	}
 
 	static Variant ParseOscString(byte[] packet, int cursor)

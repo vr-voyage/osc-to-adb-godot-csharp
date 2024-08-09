@@ -22,6 +22,9 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 		}
 	}
 
+	[Export]
+	public ScaledTextureRect PhoneScreen { get; set; }
+
 	bool Moving {get; set;} = false;
 	Vector2 ParentPosition {get; set;} = Vector2.Zero;
 	Viewport ViewPort {get; set;} = null;
@@ -37,8 +40,9 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 	void ReloadResource()
 	{
 		Color = CurrentClickerSettings.Color;
-		Position = ClampPositionToParent(CurrentClickerSettings.Position);
-		
+		Vector2 scaledPosition = CurrentClickerSettings.Position * PhoneScreen.CurrentScale;
+		GD.Print($"[Clicker Setter] Position : {CurrentClickerSettings.Position} * {PhoneScreen.Scale} = {scaledPosition}");
+		Position = ClampPositionToParent(scaledPosition);
 	}
 
 	public Vector2 ClampPositionToParent(Vector2 pos)
@@ -72,11 +76,10 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 			Moving = mouseButtonEvent.Pressed;
 			Vector2 parentPosition = Vector2.Zero;
 			Vector2 limits = Vector2.Zero;
-			Control parent = GetParent() as Control;
-			if (parent != null)
+			if (PhoneScreen != null)
 			{
-				parentPosition = parent.GlobalPosition;
-				limits = GetParentAreaSize() - Size;
+				parentPosition = PhoneScreen.GlobalPosition;
+				limits = PhoneScreen.Size - Size;
 				limits.X = (limits.X >= 0f ? limits.X : 0f);
 				limits.Y = (limits.Y >= 0f ? limits.Y : 0f);
 			}
@@ -84,6 +87,10 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 			Limits = limits;
 			
 			ViewPort = GetViewport();
+			if (!Moving)
+			{
+				CurrentClickerSettings.Position = Position * PhoneScreen.ReverseScale;
+			}
 		}
 	}
 
@@ -106,14 +113,14 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 	public void OscValuesChanged(OscValuesRead values)
 	{
 		if (!CurrentClickerSettings.Enabled) return;
-
+		GD.Print("Osc Values Changed");
 		OscActionConditionResource condition = CurrentClickerSettings.Condition;
 
 		bool conditionMet = values.IsConditionMet(condition);
 		if (!ConditionMetOnLastCheck && conditionMet)
 		{
 			ConditionMetOnLastCheck = true;
-			EmitSignal(SignalName.ClickTriggered, Position);
+			EmitSignal(SignalName.ClickTriggered, CurrentClickerSettings.Position);
 		}
 		else if (!conditionMet)
 		{

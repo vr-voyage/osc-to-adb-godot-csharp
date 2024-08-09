@@ -10,7 +10,7 @@ namespace AdbGodotSharp
     public partial class OscValuesRead : Resource
     {
         [Export]
-        public Godot.Collections.Dictionary<string, Variant> Values { get; set; }
+        public Godot.Collections.Dictionary<string, Variant> Values { get; set; } = new Godot.Collections.Dictionary<string, Variant>();
 
         public void Set(string name, Variant value)
         {
@@ -29,6 +29,7 @@ namespace AdbGodotSharp
 
         public bool IsConditionMet(OscActionConditionResource condition)
         {
+            GD.Print("Condition Met");
             string oscPath = condition.Path;
             if (!HasValue(oscPath)) return false;
 
