@@ -11,6 +11,9 @@ public partial class UserDefinedOscClickers : VBoxContainer
 	public UserDefinedOscClickerSetter ClickLocationSetter { get; set; }
 
 	[Export]
+	public UserDefinedOscClickerContextMenu ClickerContextMenu { get; set; }
+
+	[Export]
 	public UserDefinedOscClickersResource OscClickers { get; set; } = new UserDefinedOscClickersResource();
 
 
@@ -77,6 +80,7 @@ public partial class UserDefinedOscClickers : VBoxContainer
 			display.ShownClicker = locationClicker;
 			display.DisplayDeselected += ChildDisplayDeselected;
 			display.DisplaySelected += ChildDisplaySelected;
+			display.ContextMenuRequested += HandleContextMenuRequests;
 			AddChild(display);
 		}
 	}
@@ -89,10 +93,6 @@ public partial class UserDefinedOscClickers : VBoxContainer
 
 	public void Add(Resource locationClicker)
 	{
-		GD.Print("Add");
-		GD.Print($"{locationClicker}");
-		GD.Print($"{OscClickers}");
-		GD.Print($"{OscClickers.LocationClickers}");
 		OscClickers.LocationClickers.Add((UserDefinedLocationClickerResource)locationClicker);
 
 		RefreshList();
@@ -104,5 +104,77 @@ public partial class UserDefinedOscClickers : VBoxContainer
 		RefreshList();
 	}
 
+	public void AddOrEditValue(string path, Variant value)
+	{
+		var children = GetChildren();
+		foreach (var child in children)
+		{
+			if (child is not UserDefinedLocationClickerDisplay)
+			{
+				continue;
+			}
+			UserDefinedLocationClickerDisplay display = (UserDefinedLocationClickerDisplay)child;
+			UserDefinedLocationClickerResource oscClicker = display.ShownClicker;
+			if (oscClicker == null) continue;
+
+			OscActionConditionResource actionCondition = oscClicker.Condition;
+			if (actionCondition == null) continue;
+
+			if (actionCondition.Path == path)
+			{
+				display.Selected();
+				return;
+			}
+		}
+
+		UserDefinedLocationClickerResource newClicker = new()
+		{
+			Enabled = false,
+			Condition = new()
+			{
+				Path = path,
+				Threshold = value.ToFloat()
+			}
+		};
+		Add(newClicker);
+	}
+
+	public void HandleContextMenuRequests(UserDefinedLocationClickerDisplay fromChildDisplay)
+	{
+		Rect2I popupLocation = new Rect2(
+			GetViewport().GetMousePosition(),
+			ClickerContextMenu.Size).ToInt();
+
+		ClickerContextMenu.TargetClicker = fromChildDisplay.ShownClicker;
+		ClickerContextMenu.Popup(popupLocation);
+	}
+
+	public void HandleDeleteRequest(UserDefinedLocationClickerResource clicker)
+	{
+		GD.Print($"Handle Delete Request of {clicker.Condition.Path}");
+		if (selectedDisplay != null && selectedDisplay.ShownClicker == clicker)
+		{
+			selectedDisplay.Deselect();
+			selectedDisplay = null;
+			NotifySelectionChanged();
+		}
+		var deleted = OscClickers.LocationClickers.Remove(clicker);
+		GD.Print($"Deleted ? {deleted}");
+		RefreshList();
+	}
+
+}
+
+public static class VectorHelpers
+{
+	public static Vector2I ToInt(this Vector2 vector)
+	{
+		return new Vector2I((int)vector.X, (int)vector.Y);
+	}
+
+	public static Rect2I ToInt(this Rect2 rect)
+	{
+		return new Rect2I(rect.Position.ToInt(), rect.Size.ToInt());
+	}
 }
 

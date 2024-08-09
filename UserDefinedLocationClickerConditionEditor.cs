@@ -108,7 +108,7 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 
 		OscPathEdit.Text = condition.Path;
 		ConditionMenuSelect.Selected = (int)condition.Condition;
-		ThresholdEdit.Text = condition.Threshold.ToString();
+		ThresholdEdit.Text = condition.Threshold.ToString(CultureInfo.InvariantCulture);
 		GD.Print($"{condition.Path} - {condition.Threshold}");
 	}
 

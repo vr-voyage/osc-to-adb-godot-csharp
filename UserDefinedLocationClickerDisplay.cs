@@ -46,7 +46,11 @@ public partial class UserDefinedLocationClickerDisplay : PanelContainer
 	[Signal]
 	public delegate void DisplayDeselectedEventHandler(UserDefinedLocationClickerDisplay display);
 
-	public void Display()
+	[Signal]
+	public delegate void ContextMenuRequestedEventHandler(UserDefinedLocationClickerDisplay display);
+
+
+    public void Display()
 	{
 		if (!IsNodeReady())
 		{
@@ -67,21 +71,29 @@ public partial class UserDefinedLocationClickerDisplay : PanelContainer
 
 	public override void _GuiInput(InputEvent @event)
 	{
-		if (@event is InputEventMouseButton)
+		if (@event is not InputEventMouseButton)
 		{
-			var mouseClick = @event as InputEventMouseButton;
-			if (mouseClick.ButtonIndex == MouseButton.Left && !mouseClick.Pressed)
+			return;
+		}
+
+		var mouseClick = @event as InputEventMouseButton;
+		if (mouseClick.Pressed) return;
+			
+		if (mouseClick.ButtonIndex == MouseButton.Left)
+		{
+			GD.Print("[UserDefinedLocationClickerDisplay] Clicked");
+			if (!selected)
 			{
-				GD.Print("[UserDefinedLocationClickerDisplay] Clicked");
-				if (!selected)
-				{
-					Selected();
-				}
-				else
-				{
-					Deselected();
-				}
+				Selected();
 			}
+			else
+			{
+				Deselected();
+			}
+		}
+		if (mouseClick.ButtonIndex == MouseButton.Right)
+		{
+			RequestingContextualMenu();
 		}
 	}
 
@@ -109,7 +121,13 @@ public partial class UserDefinedLocationClickerDisplay : PanelContainer
 		EmitSignal(SignalName.DisplayDeselected, this);
 	}
 
-	private void OnCheckBoxToggled(bool toggled)
+	public void RequestingContextualMenu()
+	{
+		EmitSignal(SignalName.ContextMenuRequested, this);
+	}
+
+
+    private void OnCheckBoxToggled(bool toggled)
 	{
 		if (shownClicker != null)
 		{

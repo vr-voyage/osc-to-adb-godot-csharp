@@ -3,7 +3,6 @@ using Godot;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 
 public partial class AdbHandler : Control
@@ -181,12 +180,37 @@ public partial class AdbHandler : Control
 		}
 	}
 
-	public override void _ExitTree()
+	void KillCurrentProcess()
+	{
+		currentThreadData?.currentProcess?.Kill();
+	}
+
+	void KillAnyAdb()
 	{
 		foreach (var process in Process.GetProcessesByName("adb"))
 		{
 			process.Kill();
 		}
+	}
+
+	void Termination()
+	{
+		KillCurrentProcess();
+		KillAnyAdb();
+
+	}
+
+	public override void _Notification(int what)
+	{
+		if (what == NotificationWMCloseRequest)
+		{
+			Termination();
+		}
+	}
+
+	public override void _ExitTree()
+	{
+		Termination();
 	}
 
 }

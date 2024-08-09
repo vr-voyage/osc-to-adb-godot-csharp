@@ -49,6 +49,14 @@ public partial class OscServer : Control
 		if (settings != null) { StartServer(); } else {	StopServer(); }
 	}
 
+	public override void _Notification(int what)
+	{
+		if (what == NotificationWMCloseRequest)
+		{
+			StopServer();
+		}
+	}
+
 	public override void _ExitTree()
 	{
 		StopServer();
@@ -88,7 +96,6 @@ public partial class OscServer : Control
 
 		if (dirty)
 		{
-			GD.Print("Got some OSC Values !");
 			EmitSignal(SignalName.OscValuesUpdated, OscValues);
 		}
 

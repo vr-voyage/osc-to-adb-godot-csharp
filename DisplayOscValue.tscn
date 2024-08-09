@@ -26,3 +26,5 @@ text = "ABC"
 
 [node name="Label2" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+
+[connection signal="gui_input" from="." to="." method="OnGuiInput"]

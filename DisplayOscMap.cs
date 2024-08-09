@@ -10,6 +10,9 @@ public partial class DisplayOscMap : Control
 	[Export]
 	public OscServer server;
 
+	[Signal]
+	public delegate void ItemDoubleClickedEventHandler(string valueName, Variant value);
+
 	public void ClearChildren()
 	{
 		int nChildren = GetChildCount();
@@ -30,6 +33,11 @@ public partial class DisplayOscMap : Control
 		server.OscValuesUpdated -= DisplayMap;
 	}
 
+	void ChildDoubleClicked(string valueName, Variant value)
+	{
+		EmitSignal(SignalName.ItemDoubleClicked, valueName, value);
+	}
+
 	public void DisplayMap(OscValuesRead oscValuesRead)
 	{
 		ClearChildren();
@@ -41,6 +49,7 @@ public partial class DisplayOscMap : Control
 			{
 				return;
 			}
+			display.ItemDoubleClicked += ChildDoubleClicked;
 			AddChild(display);
 			display.DisplayValue(valueName, value);
 		}
