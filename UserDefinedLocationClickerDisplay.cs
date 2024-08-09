@@ -5,9 +5,11 @@ using System;
 public partial class UserDefinedLocationClickerDisplay : PanelContainer
 {
 
+	[Export]
+	public CheckBox enabledCheck;
 
 	[Export]
-	public ColorRect colorRect;
+	public ColorPickerButton colorRect;
 
 	[Export]
 	public Label oscPathText;
@@ -50,13 +52,14 @@ public partial class UserDefinedLocationClickerDisplay : PanelContainer
 	public delegate void ContextMenuRequestedEventHandler(UserDefinedLocationClickerDisplay display);
 
 
-    public void Display()
+	public void Display()
 	{
 		if (!IsNodeReady())
 		{
 			return;
 		}
 
+		enabledCheck.SetPressedNoSignal(ShownClicker.Enabled);
 		colorRect.Color = ShownClicker.Color;
 		OscActionConditionResource actionCondition = ShownClicker.Condition;
 		oscPathText.Text = actionCondition.Path;
@@ -127,13 +130,20 @@ public partial class UserDefinedLocationClickerDisplay : PanelContainer
 	}
 
 
-    private void OnCheckBoxToggled(bool toggled)
+	private void OnCheckBoxToggled(bool toggled)
 	{
 		if (shownClicker != null)
 		{
 			shownClicker.Enabled = toggled;
 		}
 	}
-}
 
+	private void OnColorSelected(Color newColor)
+	{
+		if (shownClicker != null)
+		{
+			shownClicker.Color = newColor;
+		}
+	}
+}
 

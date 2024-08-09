@@ -4,10 +4,11 @@
 [ext_resource type="Script" path="res://UserDefinedLocationClickerDisplay.cs" id="1_dd5gu"]
 [ext_resource type="StyleBox" uid="uid://t6fdc4b7ace5" path="res://display_style_selected.tres" id="3_up5jo"]
 
-[node name="HBoxContainer" type="PanelContainer" node_paths=PackedStringArray("colorRect", "oscPathText", "conditionText", "thresholdText")]
+[node name="HBoxContainer" type="PanelContainer" node_paths=PackedStringArray("enabledCheck", "colorRect", "oscPathText", "conditionText", "thresholdText")]
 theme_override_styles/panel = ExtResource("1_6fb4v")
 script = ExtResource("1_dd5gu")
-colorRect = NodePath("HBoxContainer/ColorRect")
+enabledCheck = NodePath("HBoxContainer/CheckBox")
+colorRect = NodePath("HBoxContainer/ColorPickerButton")
 oscPathText = NodePath("HBoxContainer/VBoxContainer/Path")
 conditionText = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/Label")
 thresholdText = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/Label2")
@@ -21,7 +22,7 @@ layout_mode = 2
 layout_mode = 2
 focus_mode = 0
 
-[node name="ColorRect" type="ColorRect" parent="HBoxContainer"]
+[node name="ColorPickerButton" type="ColorPickerButton" parent="HBoxContainer"]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -43,3 +44,4 @@ layout_mode = 2
 layout_mode = 2
 
 [connection signal="toggled" from="HBoxContainer/CheckBox" to="." method="OnCheckBoxToggled"]
+[connection signal="color_changed" from="HBoxContainer/ColorPickerButton" to="." method="OnColorSelected"]

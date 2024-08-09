@@ -60,6 +60,10 @@ namespace AdbGodotSharp
 				return null;
 			}
 
+			bool isEnabled = (bool)serializedData["Enabled"];
+			GD.Print($"Is Enabled ? {isEnabled}");
+
+
 			return new UserDefinedLocationClickerResource()
 			{
 				Enabled = (bool)serializedData["Enabled"],
