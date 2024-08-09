@@ -129,16 +129,16 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 		}
 	}
 
-	public void CurrentSelectionChanged(UserDefinedLocationClickerDisplay display)
+	public void CurrentSelectionChanged(UserDefinedLocationClickerResource resource)
 	{
 		GD.Print("CurrentSelectionChanged");
-		if (display == null)
+		if (resource == null)
 		{
 			CurrentResource = null;
 		}
 		else
 		{
-			CurrentResource = display.ShownClicker;
+			CurrentResource = resource;
 		}
 	}
 
@@ -148,3 +148,4 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 		ButtonEdit.Pressed += OnEditButtonClicked;
 	}
 }
+

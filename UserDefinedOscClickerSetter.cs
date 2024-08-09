@@ -94,9 +94,9 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 		}
 	}
 
-	public void SelectedClickerChanged(UserDefinedLocationClickerDisplay display)
+	public void SelectedClickerChanged(UserDefinedLocationClickerResource resource)
 	{
-		if (display == null)
+		if (resource == null)
 		{
 			GD.Print("[UserDefinedOscClickerSetter] SelectedClickerChanged - Display null !");
 			Visible = false;
@@ -106,7 +106,7 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 		{
 			GD.Print("[UserDefinedOscClickerSetter] SelectedClickerChanged - Display Not Null !");
 			Visible = true;
-			CurrentClickerSettings = display.ShownClicker;
+			CurrentClickerSettings = resource;
 		}
 	}
 

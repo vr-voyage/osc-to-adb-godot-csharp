@@ -1,9 +1,13 @@
 using AdbGodotSharp;
 using Godot;
+using Godot.Collections;
 using System;
 
-public partial class UserDefinedOscClickers : VBoxContainer
+public partial class UserDefinedOscClickers : Control
 {
+	[Export]
+	public Control ListLocation { get; set; }
+
 	[Export]
 	public PackedScene OscClickerDisplay { get; set; }
 
@@ -14,18 +18,52 @@ public partial class UserDefinedOscClickers : VBoxContainer
 	public UserDefinedOscClickerContextMenu ClickerContextMenu { get; set; }
 
 	[Export]
+	public string ClickersSaveDataPath { get; set; } = "user://clickers.json";
+
+	[Export]
 	public UserDefinedOscClickersResource OscClickers { get; set; } = new UserDefinedOscClickersResource();
 
 
 	public UserDefinedLocationClickerDisplay selectedDisplay;
 
+
 	[Signal]
 	public delegate void SelectionChangedEventHandler(UserDefinedLocationClickerResource selectedResource);
+
+	UserDefinedOscClickersResource TryLoadSavedData()
+	{
+		string saveData = FileAccess.GetFileAsString(ClickersSaveDataPath);
+		if (saveData == "") return null;
+
+		return UserDefinedOscClickersResource.FromJson(saveData);
+	}
+
+	public void SaveClickers()
+	{
+		var saveFile = FileAccess.Open(ClickersSaveDataPath, FileAccess.ModeFlags.Write);
+		saveFile.StoreString(OscClickers.ToJson());
+		saveFile.Close();
+	}
+
+	public override void _Ready()
+	{
+		var savedClickers = TryLoadSavedData();
+		if (savedClickers != null)
+		{
+			OscClickers = savedClickers;
+			RefreshList();
+		}
+	}
+
+	public override void _ExitTree()
+	{
+		SaveClickers();
+	}
 
 	void NotifySelectionChanged()
 	{
 		GD.Print("NotifySelectionChanged");
-		EmitSignal(SignalName.SelectionChanged, selectedDisplay);
+		EmitSignal(SignalName.SelectionChanged, selectedDisplay?.ShownClicker);
 	}
 
 	public void DeselectCurrent()
@@ -60,19 +98,21 @@ public partial class UserDefinedOscClickers : VBoxContainer
 	void RemoveChildren()
 	{
 		GD.Print("RemoveChildren");
-		var children = GetChildren();
+		var children = ListLocation.GetChildren();
 		int nChildren = children.Count;
 
 		for (int i = nChildren - 1; i >= 0; i--)
 		{
-			RemoveChild(children[i]);
+			ListLocation.RemoveChild(children[i]);
 		}
 	}
 
 	public void RefreshList()
 	{
+		var previouslySelectedClicker = selectedDisplay?.ShownClicker;
 		GD.Print("RefreshList");
 		RemoveChildren();
+		selectedDisplay = null;
 		GD.Print("Add Elements");
 		foreach (var locationClicker in OscClickers.LocationClickers)
 		{
@@ -81,32 +121,40 @@ public partial class UserDefinedOscClickers : VBoxContainer
 			display.DisplayDeselected += ChildDisplayDeselected;
 			display.DisplaySelected += ChildDisplaySelected;
 			display.ContextMenuRequested += HandleContextMenuRequests;
-			AddChild(display);
+			ListLocation.AddChild(display);
+			if (previouslySelectedClicker == locationClicker)
+			{
+				display.Selected();
+			}
 		}
+		
 	}
 
 	public void SelectLast()
 	{
-		GD.Print("SelectLast");
 		GetChild<UserDefinedLocationClickerDisplay>(-1).Selected();
 	}
 
 	public void Add(Resource locationClicker)
 	{
-		OscClickers.LocationClickers.Add((UserDefinedLocationClickerResource)locationClicker);
+		var clicker = (UserDefinedLocationClickerResource)locationClicker;
+
+		OscClickers.LocationClickers.Add(clicker);
 
 		RefreshList();
 		SelectLast();
 	}
-	
+
+
 	public void ValueEdited(Resource locationClicker)
 	{
 		RefreshList();
+		
 	}
 
 	public void AddOrEditValue(string path, Variant value)
 	{
-		var children = GetChildren();
+		var children = ListLocation.GetChildren();
 		foreach (var child in children)
 		{
 			if (child is not UserDefinedLocationClickerDisplay)
@@ -151,7 +199,7 @@ public partial class UserDefinedOscClickers : VBoxContainer
 
 	public void HandleDeleteRequest(UserDefinedLocationClickerResource clicker)
 	{
-		GD.Print($"Handle Delete Request of {clicker.Condition.Path}");
+
 		if (selectedDisplay != null && selectedDisplay.ShownClicker == clicker)
 		{
 			selectedDisplay.Deselect();
@@ -159,8 +207,23 @@ public partial class UserDefinedOscClickers : VBoxContainer
 			NotifySelectionChanged();
 		}
 		var deleted = OscClickers.LocationClickers.Remove(clicker);
-		GD.Print($"Deleted ? {deleted}");
+
 		RefreshList();
+	}
+
+	public void OnGuiInput(InputEvent @event)
+	{
+		if (@event is not InputEventMouseButton)
+		{
+			return;
+		}
+		InputEventMouseButton mouseButtonEvent = (InputEventMouseButton)@event;
+		if (mouseButtonEvent.Pressed) return;
+
+		if (mouseButtonEvent.ButtonIndex == MouseButton.Left)
+		{
+			DeselectCurrent();
+		}
 	}
 
 }
@@ -177,4 +240,3 @@ public static class VectorHelpers
 		return new Rect2I(rect.Position.ToInt(), rect.Size.ToInt());
 	}
 }
-

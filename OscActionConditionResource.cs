@@ -31,19 +31,7 @@ namespace AdbGodotSharp
 		}
 	}
 
-	public static class VariantHelpers
-	{
-		public static float ToFloat(this Godot.Variant variant)
-		{
-			return variant.VariantType switch
-			{
-				Variant.Type.Int   => (int)variant,
-				Variant.Type.Float => (float)variant,
-				Variant.Type.Bool  => ((bool)variant ? 1f : 0f),
-				_ => 0f,
-			};
-		}
-	}
+
 
 	public partial class OscActionConditionResource : Resource
 	{
@@ -88,5 +76,39 @@ namespace AdbGodotSharp
 			return checkResult;
 		}
 
-	}
+
+        public Godot.Collections.Dictionary<string, Variant> Serialize()
+        {
+			var manualSerialization = new Godot.Collections.Dictionary<string, Variant>()
+			{
+				{ "Path", Path },
+				{ "Condition", (int)Condition },
+				{ "Threshold", Threshold }
+			};
+			return manualSerialization;
+        }
+
+		public static OscActionConditionResource Deserialize(Godot.Collections.Dictionary<string, Variant> serializedData)
+		{
+			bool formatCheck = serializedData.HasFormat(
+				("Path", Variant.Type.String),
+				("Condition", Variant.Type.Float),
+				("Threshold", Variant.Type.Float));
+			if (!formatCheck) return null;
+
+			int jsonedCondition = (int)(float)serializedData["Condition"];
+			if (jsonedCondition < 0 || jsonedCondition >= 4)
+			{
+				GD.PrintErr($"Invalid condition {jsonedCondition}");
+				return null;
+			}
+
+			return new OscActionConditionResource()
+			{
+				Path = (string)serializedData["Path"],
+				Condition = (OscActionConditionEnum)jsonedCondition,
+				Threshold = (float)serializedData["Threshold"]
+			};
+		}
+    }
 }

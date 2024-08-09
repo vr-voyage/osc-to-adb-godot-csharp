@@ -42,11 +42,17 @@ Logger = NodePath("../Logger")
 
 [node name="AdbHandler" type="Control" parent="." node_paths=PackedStringArray("screenOutput", "StatusBar")]
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
 script = ExtResource("3_4h4rp")
 screenOutput = NodePath("../VBoxContainer3/HBoxContainer/PhoneScreen")
 StatusBar = NodePath("../VBoxContainer3/VBoxContainer2/StatusBar")
+
+[node name="OscClickers" type="Control" parent="." node_paths=PackedStringArray("ListLocation", "ClickLocationSetter", "ClickerContextMenu")]
+anchors_preset = 0
+script = ExtResource("3_3yooh")
+ListLocation = NodePath("../VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/ScrollContainer/OscClickers")
+OscClickerDisplay = ExtResource("6_01eg1")
+ClickLocationSetter = NodePath("../VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter")
+ClickerContextMenu = NodePath("../PopupMenu")
 
 [node name="VBoxContainer3" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -58,13 +64,13 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="VBoxContainer" type="PanelContainer" parent="VBoxContainer3"]
-custom_minimum_size = Vector2(0, 64)
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 
 [node name="TakeScreenshot" type="Button" parent="VBoxContainer3/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
-text = "Take Screenshot"
+text = "Take a phone screenshot"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer3"]
 layout_mode = 2
@@ -106,13 +112,14 @@ size_flags_vertical = 0
 text = "Clickers"
 horizontal_alignment = 1
 
-[node name="OscClickers" type="VBoxContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer" node_paths=PackedStringArray("ClickLocationSetter", "ClickerContextMenu")]
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-script = ExtResource("3_3yooh")
-OscClickerDisplay = ExtResource("6_01eg1")
-ClickLocationSetter = NodePath("../../../PhoneScreen/ClickLocationSetter")
-ClickerContextMenu = NodePath("../../../../../PopupMenu")
+
+[node name="OscClickers" type="VBoxContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Panel" type="PanelContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer"]
 layout_mode = 2
@@ -163,14 +170,15 @@ script = ExtResource("13_2dwo6")
 [connection signal="LogMessageAdded" from="Logger" to="VBoxContainer3/VBoxContainer2/StatusBar" method="ShowMessage"]
 [connection signal="OscValuesUpdated" from="OscServer" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="OscValuesChanged"]
 [connection signal="OscValuesUpdated" from="OscServer" to="VBoxContainer3/HBoxContainer/PanelContainer/ScrollContainer/DisplayValuesRead" method="DisplayMap"]
+[connection signal="SelectionChanged" from="OscClickers" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="SelectedClickerChanged"]
+[connection signal="SelectionChanged" from="OscClickers" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" method="CurrentSelectionChanged"]
 [connection signal="pressed" from="VBoxContainer3/VBoxContainer/TakeScreenshot" to="AdbHandler" method="_TriggerScreenshotAdb"]
 [connection signal="Rescaled" from="VBoxContainer3/HBoxContainer/PhoneScreen" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="ReloadResource"]
 [connection signal="gui_input" from="VBoxContainer3/HBoxContainer/PhoneScreen" to="." method="_OnScreenClicked"]
 [connection signal="ClickTriggered" from="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" to="AdbHandler" method="ClickTriggered"]
-[connection signal="SelectionChanged" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="SelectedClickerChanged"]
-[connection signal="SelectionChanged" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" method="CurrentSelectionChanged"]
-[connection signal="AddOscClicker" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" method="Add"]
-[connection signal="ValuesEdited" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" method="ValueEdited"]
-[connection signal="ItemDoubleClicked" from="VBoxContainer3/HBoxContainer/PanelContainer/ScrollContainer/DisplayValuesRead" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" method="AddOrEditValue"]
-[connection signal="InvokedDelete" from="PopupMenu" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/OscClickers" method="HandleDeleteRequest"]
+[connection signal="gui_input" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/ScrollContainer/OscClickers" to="OscClickers" method="OnGuiInput"]
+[connection signal="AddOscClicker" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="OscClickers" method="Add"]
+[connection signal="ValuesEdited" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="OscClickers" method="ValueEdited"]
+[connection signal="ItemDoubleClicked" from="VBoxContainer3/HBoxContainer/PanelContainer/ScrollContainer/DisplayValuesRead" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/ScrollContainer/OscClickers" method="AddOrEditValue"]
+[connection signal="InvokedDelete" from="PopupMenu" to="OscClickers" method="HandleDeleteRequest"]
 [connection signal="index_pressed" from="PopupMenu" to="PopupMenu" method="OnMenuItemPressed"]

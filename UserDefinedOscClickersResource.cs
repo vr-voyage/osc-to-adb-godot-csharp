@@ -1,10 +1,84 @@
 using Godot;
+using Godot.Collections;
 
 namespace AdbGodotSharp
 {
 	public partial class UserDefinedOscClickersResource : Resource
 	{
 		[Export]
-		public Godot.Collections.Array<UserDefinedLocationClickerResource> LocationClickers { get; set; } = new Godot.Collections.Array<UserDefinedLocationClickerResource>();
-	}
+		public Array<UserDefinedLocationClickerResource> LocationClickers { get; set; } = new Godot.Collections.Array<UserDefinedLocationClickerResource>();
+
+		public Dictionary<string, Variant> Serialize()
+		{
+			Array<Dictionary<string, Variant>> serializedClickers =
+				new();
+			foreach (var clicker in LocationClickers)
+			{
+				serializedClickers.Add(clicker.Serialize());
+			}
+			Dictionary<string, Variant> serializedValue = new()
+			{
+				{ "@type", "Voyage.UserDefinedOscClickersResource" },
+				{ "version", 1 },
+				{ "clickers", serializedClickers }
+			};
+			return serializedValue;
+
+        }
+
+		public string ToJson()
+		{
+			return Json.Stringify(Serialize());
+		}
+
+		public static UserDefinedOscClickersResource FromJson(string jsonData)
+		{
+			Variant deserializedData = Json.ParseString(jsonData);
+            if (deserializedData.VariantType != Variant.Type.Dictionary)
+			{
+				GD.PrintErr("I don't know what that is");
+				return null;
+			}
+			Dictionary<string, Variant> serializedClickers = (Dictionary<string, Variant>)deserializedData;
+
+			if (!serializedClickers.ContainsKey("@type") || !serializedClickers.ContainsKey("clickers"))
+			{
+				GD.PrintErr("Don't have the required keys");
+				return null;
+			}
+
+			if (serializedClickers["@type"].VariantType != Variant.Type.String)
+			{
+				GD.PrintErr("Not our JSON file");
+				return null;
+			}
+			string type = (string)serializedClickers["@type"];
+			if (type != "Voyage.UserDefinedOscClickersResource")
+			{
+				GD.PrintErr("Invalid type");
+				return null;
+			}
+
+			Variant clickersVariant = serializedClickers["clickers"];
+			if (clickersVariant.VariantType != Variant.Type.Array)
+			{
+				GD.Print("No useable clickers");
+				return null;
+			}
+
+			Array<Dictionary<string, Variant>> clickers = (Array<Dictionary<string, Variant>>)clickersVariant;
+
+            var clickersResource = new UserDefinedOscClickersResource();
+            foreach (var clicker in clickers)
+			{
+				UserDefinedLocationClickerResource clickerResource = UserDefinedLocationClickerResource.Deserialize(clicker);
+				if (clickerResource != null)
+				{
+                    clickersResource.LocationClickers.Add(clickerResource);
+				}
+			}
+			return clickersResource;
+
+        }
+    }
 }
