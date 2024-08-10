@@ -7,7 +7,7 @@ using System.Diagnostics;
 public partial class MainApp : Control
 {
 	[Export]
-	public string SettingsFilePath { get; set; } = "user://MainSettings.res";
+	public string SettingsFilePath { get; set; } = "user://MainSettings.json";
 
 	[Export]
 	public MainSettingsEditor SettingsEditor { get; set; }
@@ -21,13 +21,24 @@ public partial class MainApp : Control
 
 	public UserMainSettingsResource LoadSettings()
 	{
-		return ResourceLoader.Load(SettingsFilePath).ToMainSettings();  
+		var res = UserMainSettingsResource.FromJson(FileAccess.GetFileAsString(SettingsFilePath));
+		GD.Print($"Loaded settings Adb Path : {res.adbPath}");
+		return res;
+
 	}
 
 	public bool CreateSaveFile()
 	{
 		var settings = new UserMainSettingsResource();
-		return (ResourceSaver.Save(settings, SettingsFilePath, ResourceSaver.SaverFlags.OmitEditorProperties | ResourceSaver.SaverFlags.BundleResources) == Error.Ok);
+		using FileAccess saveFile = FileAccess.Open(SettingsFilePath, FileAccess.ModeFlags.Write);
+		if (saveFile == null)
+		{
+			return false;
+		}
+		saveFile.StoreString(settings.ToJson());
+		saveFile.Close();
+
+		return true;
 	}
 
 	void ShowSettings()
@@ -45,7 +56,10 @@ public partial class MainApp : Control
 
 	bool StartAppIfSettingsSeemCorrect()
 	{
-		if (AppInitialized) return true;
+		if (AppInitialized)
+		{
+			return true;
+		}
 
 		UserMainSettingsResource settings = LoadSettings();
 		if (settings == null)
@@ -91,19 +105,5 @@ public partial class MainApp : Control
 		{
 			ShowSettings();
 		}
-	}
-}
-
-public static class ResourceHelpers
-{
-	public static UserMainSettingsResource ToMainSettings(this Resource resource)
-	{
-		UserMainSettingsResource res = new UserMainSettingsResource();
-		GD.Print($"{res.GetPropertyList()}");
-		GD.Print($"{res.GetMetaList()}");
-
-		res.adbPath = (string)resource.Get("adbPath");
-		GD.Print($"Resource {resource.Get("adbPath")}");
-		return res;
 	}
 }

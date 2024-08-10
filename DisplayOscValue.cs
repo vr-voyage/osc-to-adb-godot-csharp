@@ -28,7 +28,6 @@ public partial class DisplayOscValue : PanelContainer
 	{
 		if (@event is InputEventMouseButton)
 		{
-			GD.Print("[DisplayOscValue] Clicky Clicky !");
 			var mouseButtonEvent = @event as InputEventMouseButton;
 			if (mouseButtonEvent.DoubleClick)
 			{

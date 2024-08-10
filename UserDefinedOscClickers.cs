@@ -40,7 +40,11 @@ public partial class UserDefinedOscClickers : Control
 
 	public void SaveClickers()
 	{
-		var saveFile = FileAccess.Open(ClickersSaveDataPath, FileAccess.ModeFlags.Write);
+		using FileAccess saveFile = FileAccess.Open(ClickersSaveDataPath, FileAccess.ModeFlags.Write);
+		if (saveFile == null)
+		{
+			return;
+		}
 		saveFile.StoreString(OscClickers.ToJson());
 		saveFile.Close();
 	}
@@ -132,7 +136,8 @@ public partial class UserDefinedOscClickers : Control
 
 	public void SelectLast()
 	{
-		GetChild<UserDefinedLocationClickerDisplay>(-1).Selected();
+		if (ListLocation.GetChildCount() == 0) return;
+        ListLocation.GetChild<UserDefinedLocationClickerDisplay>(-1).Selected();
 	}
 
 	public void Add(Resource locationClicker)

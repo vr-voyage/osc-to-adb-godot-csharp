@@ -26,6 +26,9 @@ public partial class UserDefinedLocationClickerDisplay : PanelContainer
 	[Export]
 	public StyleBox NotSelectedStyle { get; set; }
 
+	[Signal]
+	public delegate void ClickerResourceUpdatedEventHandler(UserDefinedLocationClickerResource resource);
+
 	bool selected = false;
 
 	private UserDefinedLocationClickerResource shownClicker;
@@ -129,13 +132,13 @@ public partial class UserDefinedLocationClickerDisplay : PanelContainer
 		EmitSignal(SignalName.ContextMenuRequested, this);
 	}
 
-
 	private void OnCheckBoxToggled(bool toggled)
 	{
 		if (shownClicker != null)
 		{
 			shownClicker.Enabled = toggled;
 		}
+		EmitSignal(SignalName.ClickerResourceUpdated, shownClicker);
 	}
 
 	private void OnColorSelected(Color newColor)
@@ -144,6 +147,7 @@ public partial class UserDefinedLocationClickerDisplay : PanelContainer
 		{
 			shownClicker.Color = newColor;
 		}
+		EmitSignal(SignalName.ClickerResourceUpdated, shownClicker);
 	}
 }
 

@@ -27,7 +27,7 @@ expand_margin_top = 16.0
 expand_margin_right = 16.0
 expand_margin_bottom = 16.0
 
-[node name="Settings" type="PanelContainer" node_paths=PackedStringArray("AdbPathEdit", "AdbPathSelector")]
+[node name="Settings" type="PanelContainer" node_paths=PackedStringArray("AdbPathEdit", "AdbPathSelector", "FoundAdbPaths", "SearchButton")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -36,6 +36,8 @@ grow_vertical = 2
 script = ExtResource("1_13opd")
 AdbPathEdit = NodePath("VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer/HBoxContainer/LineEdit")
 AdbPathSelector = NodePath("FileDialog")
+FoundAdbPaths = NodePath("VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer/VBoxContainer/ItemList")
+SearchButton = NodePath("VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer/VBoxContainer/Button")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -113,6 +115,43 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Search for ADB"
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+text = "Results"
+
+[node name="ItemList" type="ItemList" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Search for ADB.exe"
+
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 
@@ -140,5 +179,7 @@ filters = PackedStringArray("adb.exe ; ADB")
 use_native_dialog = true
 
 [connection signal="pressed" from="VBoxContainer/PanelContainer/HBoxContainer/MarginContainer/Button" to="." method="Save"]
+[connection signal="item_selected" from="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer/VBoxContainer/ItemList" to="." method="OnAdbExeFoundListItemSelected"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer2/MarginContainer/PanelContainer/VBoxContainer/Button" to="." method="StartSearchForAdbExe"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/MarginContainer/ScrollContainer/VBoxContainer/VBoxContainer/HBoxContainer/Button" to="." method="SelectAdbFileButtonPressed"]
 [connection signal="file_selected" from="FileDialog" to="." method="OnAdbExeFilePathSelected"]

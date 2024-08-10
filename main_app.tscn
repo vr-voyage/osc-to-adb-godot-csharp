@@ -13,13 +13,13 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_oufs6")
 SettingsEditor = NodePath("Settings")
-MainPart = NodePath("MainApp")
+MainPart = NodePath("MainUi")
 
 [node name="Settings" parent="." instance=ExtResource("2_vtvlw")]
 visible = false
 layout_mode = 1
 
-[node name="MainApp" parent="." instance=ExtResource("2_n7tag")]
+[node name="MainUi" parent="." instance=ExtResource("2_n7tag")]
 visible = false
 layout_mode = 1
 

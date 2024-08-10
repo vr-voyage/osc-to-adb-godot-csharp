@@ -1,6 +1,7 @@
 using AdbGodotSharp;
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -28,6 +29,7 @@ public partial class AdbHandler : Control
 
 	public class ThreadData
 	{
+		public Thread threadHandle;
 		public ThreadType threadType = ThreadType.Unknown;
 		public String adbExeFilePath;
 		public String arguments;
@@ -44,7 +46,7 @@ public partial class AdbHandler : Control
 		return ms.ToArray();
 	}
 
-	public static void TakeScreenshot(Object localDataUncasted)
+	public static void TakeScreenshot(object localDataUncasted)
 	{
 		GD.Print("Taking screenshot !");
 		ThreadData localData = (ThreadData)localDataUncasted;

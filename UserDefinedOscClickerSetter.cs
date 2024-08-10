@@ -3,8 +3,6 @@ using Godot;
 using Godot.Collections;
 using System;
 
-
-
 public partial class UserDefinedOscClickerSetter : ColorRect
 {
 	private UserDefinedLocationClickerResource resource = new UserDefinedLocationClickerResource();
@@ -26,7 +24,7 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 	public ScaledTextureRect PhoneScreen { get; set; }
 
 	bool Moving {get; set;} = false;
-	Vector2 ParentPosition {get; set;} = Vector2.Zero;
+	Vector2 PhoneScreenPosition {get; set;} = Vector2.Zero;
 	Viewport ViewPort {get; set;} = null;
 
 	Vector2 Limits { get; set; } = Vector2.Zero;
@@ -41,7 +39,8 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 	{
 		Color = CurrentClickerSettings.Color;
 		Vector2 scaledPosition = CurrentClickerSettings.Position * PhoneScreen.CurrentScale;
-		GD.Print($"[Clicker Setter] Position : {CurrentClickerSettings.Position} * {PhoneScreen.Scale} = {scaledPosition}");
+		Limits = PhoneScreen.Size - Size;
+		GD.Print($"[Clicker Setter] Position : {CurrentClickerSettings.Position} * {PhoneScreen.CurrentScale} = {scaledPosition}");
 		Position = ClampPositionToParent(scaledPosition);
 	}
 
@@ -57,7 +56,7 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 		if (Moving)
 		{
 			Vector2 newPosition = 
-				(ViewPort.GetMousePosition() - ParentPosition - HalfSize);
+				(ViewPort.GetMousePosition() - PhoneScreenPosition - HalfSize);
 			Position = ClampPositionToParent(newPosition);
 		}
 	}
@@ -74,16 +73,16 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 		if (mouseButtonEvent != null)
 		{
 			Moving = mouseButtonEvent.Pressed;
-			Vector2 parentPosition = Vector2.Zero;
+			Vector2 phoneScreenPosition = Vector2.Zero;
 			Vector2 limits = Vector2.Zero;
 			if (PhoneScreen != null)
 			{
-				parentPosition = PhoneScreen.GlobalPosition;
+				phoneScreenPosition = PhoneScreen.GlobalPosition;
 				limits = PhoneScreen.Size - Size;
 				limits.X = (limits.X >= 0f ? limits.X : 0f);
 				limits.Y = (limits.Y >= 0f ? limits.Y : 0f);
 			}
-			ParentPosition = parentPosition;
+			PhoneScreenPosition = phoneScreenPosition;
 			Limits = limits;
 			
 			ViewPort = GetViewport();
