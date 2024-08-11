@@ -24,7 +24,7 @@ namespace AdbGodotSharp
 			};
 			return serializedValue;
 
-        }
+		}
 
 		public string ToJson()
 		{
@@ -33,13 +33,13 @@ namespace AdbGodotSharp
 
 		public static UserDefinedOscClickersResource FromJson(string jsonData)
 		{
-			Variant deserializedData = Json.ParseString(jsonData);
-            if (deserializedData.VariantType != Variant.Type.Dictionary)
+			Dictionary<string, Variant> serializedClickers = 
+				JsonHelpers.ParseJsonDictionary(jsonData);
+			if (serializedClickers == null)
 			{
-				GD.PrintErr("I don't know what that is");
+				GD.PrintErr("I don't know what this is");
 				return null;
 			}
-			Dictionary<string, Variant> serializedClickers = (Dictionary<string, Variant>)deserializedData;
 
 			if (!serializedClickers.ContainsKey("@type") || !serializedClickers.ContainsKey("clickers"))
 			{
@@ -68,17 +68,17 @@ namespace AdbGodotSharp
 
 			Array<Dictionary<string, Variant>> clickers = (Array<Dictionary<string, Variant>>)clickersVariant;
 
-            var clickersResource = new UserDefinedOscClickersResource();
-            foreach (var clicker in clickers)
+			var clickersResource = new UserDefinedOscClickersResource();
+			foreach (var clicker in clickers)
 			{
 				UserDefinedLocationClickerResource clickerResource = UserDefinedLocationClickerResource.Deserialize(clicker);
 				if (clickerResource != null)
 				{
-                    clickersResource.LocationClickers.Add(clickerResource);
+					clickersResource.LocationClickers.Add(clickerResource);
 				}
 			}
 			return clickersResource;
 
-        }
-    }
+		}
+	}
 }

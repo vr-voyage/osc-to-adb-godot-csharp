@@ -113,4 +113,34 @@ namespace AdbGodotSharp
             return allValuesHaveCorrectFormat;
         }
     }
+
+    public static class JsonHelpers
+    {
+        public static Dictionary<string, Variant> ParseJsonDictionary(string jsonData)
+        {
+            if (jsonData == null) { return null; }
+            if (jsonData.Trim().Length == 0) { return null; }
+
+            Dictionary<string, Variant> parsedData;
+            try
+            {
+                Json parser = new Json();
+                if (parser.Parse(jsonData) != Error.Ok)
+                {
+                    return null;
+                }
+                if (parser.Data.VariantType != Variant.Type.Dictionary)
+                {
+                    return null;
+                }
+                parsedData = (Dictionary<string, Variant>)parser.Data;
+            }
+            catch (System.Exception)
+            {
+                return null;
+            }
+            return parsedData;
+        }
+    }
+
 }

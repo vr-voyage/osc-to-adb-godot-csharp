@@ -21,10 +21,8 @@ public partial class MainApp : Control
 
 	public UserMainSettingsResource LoadSettings()
 	{
-		var res = UserMainSettingsResource.FromJson(FileAccess.GetFileAsString(SettingsFilePath));
-		GD.Print($"Loaded settings Adb Path : {res.adbPath}");
-		return res;
 
+        return UserMainSettingsResource.FromJson(FileAccess.GetFileAsString(SettingsFilePath));
 	}
 
 	public bool CreateSaveFile()
@@ -61,7 +59,9 @@ public partial class MainApp : Control
 			return true;
 		}
 
+		GD.Print("StartAppBeforeLoad");
 		UserMainSettingsResource settings = LoadSettings();
+		GD.Print("StartAppAfterLoad");
 		if (settings == null)
 		{
 			GD.Print("Could not load the settings from the disk");

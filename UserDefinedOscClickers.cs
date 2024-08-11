@@ -35,10 +35,18 @@ public partial class UserDefinedOscClickers : Control
 
 	UserDefinedOscClickersResource TryLoadSavedData()
 	{
-		string saveData = FileAccess.GetFileAsString(ClickersSaveDataPath);
-		if (saveData == "") return null;
+		try
+		{
+			string saveData = FileAccess.GetFileAsString(ClickersSaveDataPath);
+			if (saveData == "") return null;
 
-		return UserDefinedOscClickersResource.FromJson(saveData);
+			return UserDefinedOscClickersResource.FromJson(saveData);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+
 	}
 
 	public void SaveClickers()

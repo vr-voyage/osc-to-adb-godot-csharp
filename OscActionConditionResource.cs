@@ -77,8 +77,8 @@ namespace AdbGodotSharp
 		}
 
 
-        public Godot.Collections.Dictionary<string, Variant> Serialize()
-        {
+		public Godot.Collections.Dictionary<string, Variant> Serialize()
+		{
 			var manualSerialization = new Godot.Collections.Dictionary<string, Variant>()
 			{
 				{ "Path", Path },
@@ -86,7 +86,7 @@ namespace AdbGodotSharp
 				{ "Threshold", Threshold }
 			};
 			return manualSerialization;
-        }
+		}
 
 		public static OscActionConditionResource Deserialize(Godot.Collections.Dictionary<string, Variant> serializedData)
 		{
@@ -110,5 +110,5 @@ namespace AdbGodotSharp
 				Threshold = (float)serializedData["Threshold"]
 			};
 		}
-    }
+	}
 }

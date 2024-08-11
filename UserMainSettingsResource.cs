@@ -13,7 +13,7 @@ namespace AdbGodotSharp
 		private const string serializedType = "Voyage.UserMainSettingsResource";
 
 
-        public bool AdbAppearUseable()
+		public bool AdbAppearUseable()
 		{
 			GD.Print($"Provided AdbPath is {adbPath}");
 			return FileAccess.FileExists(adbPath);
@@ -55,23 +55,25 @@ namespace AdbGodotSharp
 
 
 			return returnedResource;
-        }
+		}
 
 		public static UserMainSettingsResource FromJson(string jsonData)
 		{
-			var parsedData = Json.ParseString(jsonData);
-			if (parsedData.VariantType != Variant.Type.Dictionary)
+
+            Godot.Collections.Dictionary<string, Variant> parsedData =
+				JsonHelpers.ParseJsonDictionary(jsonData);
+			if (parsedData == null)
 			{
 				GD.Print("I don't know what that is");
 				return null;
 			}
 
-			return Deserialize((Godot.Collections.Dictionary<string, Variant>)parsedData);
+			return Deserialize(parsedData);
 		}
 
 		public string ToJson()
 		{
 			return Json.Stringify(Serialize());
 		}
-    }
+	}
 }
