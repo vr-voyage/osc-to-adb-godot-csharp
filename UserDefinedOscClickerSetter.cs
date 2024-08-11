@@ -1,7 +1,5 @@
 using AdbGodotSharp;
 using Godot;
-using Godot.Collections;
-using System;
 
 public partial class UserDefinedOscClickerSetter : ColorRect
 {
@@ -29,11 +27,6 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 
 	Vector2 Limits { get; set; } = Vector2.Zero;
 	Vector2 HalfSize { get; set; } = Vector2.Zero;
-
-	[Signal]
-	public delegate void ClickTriggeredEventHandler(Vector2 position);
-
-	bool ConditionMetOnLastCheck { get; set; } = false;
 
 	void ReloadResource()
 	{
@@ -106,24 +99,6 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 			GD.Print("[UserDefinedOscClickerSetter] SelectedClickerChanged - Display Not Null !");
 			Visible = true;
 			CurrentClickerSettings = resource;
-		}
-	}
-
-	public void OscValuesChanged(OscValuesRead values)
-	{
-		if (!CurrentClickerSettings.Enabled) return;
-		GD.Print("Osc Values Changed");
-		OscActionConditionResource condition = CurrentClickerSettings.Condition;
-
-		bool conditionMet = values.IsConditionMet(condition);
-		if (!ConditionMetOnLastCheck && conditionMet)
-		{
-			ConditionMetOnLastCheck = true;
-			EmitSignal(SignalName.ClickTriggered, CurrentClickerSettings.Position);
-		}
-		else if (!conditionMet)
-		{
-			ConditionMetOnLastCheck = false;
 		}
 	}
 

@@ -133,10 +133,10 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="VBoxContainer3/HBoxContainer"]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(366.12, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.5
+size_flags_stretch_ratio = 0.8
 mouse_filter = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer3/HBoxContainer/PanelContainer"]
@@ -171,14 +171,14 @@ item_2/id = 1
 script = ExtResource("13_2dwo6")
 
 [connection signal="LogMessageAdded" from="Logger" to="VBoxContainer3/VBoxContainer2/StatusBar" method="ShowMessage"]
-[connection signal="OscValuesUpdated" from="OscServer" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="OscValuesChanged"]
+[connection signal="OscValuesUpdated" from="OscServer" to="OscClickers" method="OscValuesChanged"]
 [connection signal="OscValuesUpdated" from="OscServer" to="VBoxContainer3/HBoxContainer/PanelContainer/ScrollContainer/DisplayValuesRead" method="DisplayMap"]
+[connection signal="ClickTriggered" from="OscClickers" to="AdbHandler" method="ClickTriggered"]
 [connection signal="SelectionChanged" from="OscClickers" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="SelectedClickerChanged"]
 [connection signal="SelectionChanged" from="OscClickers" to="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" method="CurrentSelectionChanged"]
 [connection signal="pressed" from="VBoxContainer3/VBoxContainer/TakeScreenshot" to="AdbHandler" method="_TriggerScreenshotAdb"]
 [connection signal="Rescaled" from="VBoxContainer3/HBoxContainer/PhoneScreen" to="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" method="ReloadResource"]
 [connection signal="gui_input" from="VBoxContainer3/HBoxContainer/PhoneScreen" to="." method="_OnScreenClicked"]
-[connection signal="ClickTriggered" from="VBoxContainer3/HBoxContainer/PhoneScreen/ClickLocationSetter" to="AdbHandler" method="ClickTriggered"]
 [connection signal="gui_input" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/ScrollContainer/OscClickers" to="OscClickers" method="OnGuiInput"]
 [connection signal="AddOscClicker" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="OscClickers" method="Add"]
 [connection signal="ValuesEdited" from="VBoxContainer3/HBoxContainer/PanelContainer2/VBoxContainer/Panel/MarginContainer/OscActionConditionEditor" to="OscClickers" method="ValueEdited"]

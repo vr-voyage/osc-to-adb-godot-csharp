@@ -37,7 +37,12 @@ public partial class AdbHandler : Control
 		public byte[] output = new byte[0];
 		public Process currentProcess = null;
 	};
-	ThreadData currentThreadData = null;
+	List<ThreadData> RunningThreads { get; set; } = new List<ThreadData>(32);
+	List<ThreadData> ThreadsToRemove { get; set; } = new List<ThreadData>(32);
+	//ThreadData currentThreadData = null;
+	
+
+	double nextCheck = 1.0;
 
 	public static byte[] CopyAdbOutput(ThreadData localData)
 	{
@@ -72,9 +77,39 @@ public partial class AdbHandler : Control
 		localData.currentProcess.Start();
 	}
 
+	void ProcessThreadsResults()
+	{
+		List<ThreadData> threadsToRemove = ThreadsToRemove;
+		threadsToRemove.Clear();
+
+		foreach (var threadData in RunningThreads)
+		{
+			if (threadData == null) continue;
+			if (!threadData.done) continue;
+			
+			if (threadData.threadType == ThreadType.AdbScreenshot)
+			{
+				_ShowScreenshot(threadData.output);
+			}
+			threadsToRemove.Add(threadData);
+		}
+
+		foreach (var threadToRemove in threadsToRemove)
+		{
+			RunningThreads.Remove(threadToRemove);
+		}
+		
+	}
+
 	public override void _Process(double delta)
 	{
-		if (currentThreadData == null || currentThreadData.done == false)
+		nextCheck -= delta;
+		if (nextCheck > 0) return;
+
+		nextCheck = 1;
+
+		ProcessThreadsResults();
+		/*if (currentThreadData == null || currentThreadData.done == false)
 		{
 			return;
 		}
@@ -88,7 +123,7 @@ public partial class AdbHandler : Control
 		{
 			ShowStatus("Some process finished !");
 		}
-		currentThreadData = null;
+		currentThreadData = null;*/
 	}
 
 	public void _ShowScreenshot(byte[] screenshotData)
@@ -123,12 +158,16 @@ public partial class AdbHandler : Control
 			return;
 		}
 
-		currentThreadData = new ThreadData();
-		currentThreadData.adbExeFilePath = adbPath;
-		currentThreadData.arguments = arguments;
-		currentThreadData.threadType = threadType;
-		Thread newThread = new Thread(handler);
-		newThread.Start(currentThreadData);
+		ThreadData currentThreadData = new ThreadData()
+		{
+			threadHandle = new Thread(handler),
+			adbExeFilePath = adbPath,
+			arguments = arguments,
+			threadType = threadType,
+		};
+
+		currentThreadData.threadHandle.Start(currentThreadData);
+		RunningThreads.Add(currentThreadData);
 	}
 
 	private void _TriggerScreenshotAdb()
@@ -184,7 +223,10 @@ public partial class AdbHandler : Control
 
 	void KillCurrentProcess()
 	{
-		currentThreadData?.currentProcess?.Kill();
+		foreach (var threadData in RunningThreads)
+		{
+			threadData?.currentProcess?.Kill();
+		}
 	}
 
 	void KillAnyAdb()
@@ -216,4 +258,3 @@ public partial class AdbHandler : Control
 	}
 
 }
-

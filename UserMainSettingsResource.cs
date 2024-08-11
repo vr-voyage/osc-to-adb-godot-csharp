@@ -8,7 +8,7 @@ namespace AdbGodotSharp
 	{
 		
 		[Export(PropertyHint.GlobalFile, "*.exe")]
-		public string adbPath = "file:///Program Files/Unity/Hub/Editor/2022.3.21f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe";
+		public string adbPath = "C:/Program Files/Unity/Hub/Editor/2022.3.21f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe";
 
 		private const string serializedType = "Voyage.UserMainSettingsResource";
 

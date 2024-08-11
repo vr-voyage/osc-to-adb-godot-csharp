@@ -23,6 +23,8 @@ namespace AdbGodotSharp
 		[Export]
 		public Vector2 Position { get; set; }
 
+		public bool ConditionMetOnLastCheck = false;
+
 		public static Color RandomColor()
 		{
 			var random = new Random();

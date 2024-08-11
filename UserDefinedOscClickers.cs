@@ -17,6 +17,9 @@ public partial class UserDefinedOscClickers : Control
 	[Export]
 	public UserDefinedOscClickerContextMenu ClickerContextMenu { get; set; }
 
+	[Signal]
+	public delegate void ClickTriggeredEventHandler(Vector2 vector);
+
 	[Export]
 	public string ClickersSaveDataPath { get; set; } = "user://clickers.json";
 
@@ -137,7 +140,7 @@ public partial class UserDefinedOscClickers : Control
 	public void SelectLast()
 	{
 		if (ListLocation.GetChildCount() == 0) return;
-        ListLocation.GetChild<UserDefinedLocationClickerDisplay>(-1).Selected();
+		ListLocation.GetChild<UserDefinedLocationClickerDisplay>(-1).Selected();
 	}
 
 	public void Add(Resource locationClicker)
@@ -231,6 +234,31 @@ public partial class UserDefinedOscClickers : Control
 		}
 	}
 
+	public void ConditionCheck(OscValuesRead values, UserDefinedLocationClickerResource clicker)
+	{
+		if (!clicker.Enabled) return;
+
+		OscActionConditionResource condition = clicker.Condition;
+		bool conditionMetThisTime = values.IsConditionMet(condition);
+		if (!clicker.ConditionMetOnLastCheck && conditionMetThisTime)
+		{
+			clicker.ConditionMetOnLastCheck = true;
+			EmitSignal(SignalName.ClickTriggered, clicker.Position);
+		}
+		else if (!conditionMetThisTime)
+		{
+			clicker.ConditionMetOnLastCheck = false;
+		}
+	}
+
+	public void OscValuesChanged(OscValuesRead values)
+	{
+		foreach (var clicker in OscClickers.LocationClickers)
+		{
+			ConditionCheck(values, clicker);
+		}
+	}
+
 }
 
 public static class VectorHelpers
@@ -245,3 +273,4 @@ public static class VectorHelpers
 		return new Rect2I(rect.Position.ToInt(), rect.Size.ToInt());
 	}
 }
+
