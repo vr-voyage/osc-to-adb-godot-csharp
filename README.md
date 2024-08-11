@@ -6,6 +6,8 @@ using ADB.
 
 So, this is basically an OSC to ADB clicker at the moment.
 
+![OscAdbGodotSharp](https://github.com/user-attachments/assets/2c1708d2-c035-489d-87d7-d461bf995425)
+
 # Usage
 
 ## First launch
