@@ -19,8 +19,10 @@ public partial class DisplayOscMap : Control
 		
 		for (int i = nChildren - 1; i >= 0; i--)
 		{
-			RemoveChild(GetChild(i));
-		}
+			var child = GetChild(i);
+			RemoveChild(child);
+			child.QueueFree();
+        }
 	}
 
 	public override void _EnterTree()

@@ -20,6 +20,38 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 	[Export]
 	public Button ButtonEdit { get; set; }
 
+	[Export]
+	public CheckBox LongPressCheck { get; set; }
+
+	[Export]
+	public SpinBox PressTime { get; set; }
+
+	// True if Editing an existing resource
+	// False if Preparing to add an existing resource
+	private bool editing = false;
+	public bool Editing
+	{
+		get
+		{
+			return editing;
+		}
+		set
+		{
+			if (value == false)
+			{
+				ButtonAdd.Show();
+				ButtonEdit.Hide();
+				editing = false;
+			}
+			else
+			{
+				ButtonAdd.Hide();
+				ButtonEdit.Show();
+				editing = true;
+			}
+		}
+	}
+
 	[Signal]
 	public delegate void AddOscClickerEventHandler(UserDefinedLocationClickerResource oscClicker);
 
@@ -37,17 +69,14 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 
 			if (value != null)
 			{
-				GD.Print("Set non-null value");
 				currentResource = value;
-				ButtonAdd.Hide();
-				ButtonEdit.Show();
+				Editing = true;
+
 			}
 			else
 			{
-				GD.Print("Set null value");
 				currentResource = new UserDefinedLocationClickerResource();
-				ButtonAdd.Show();
-				ButtonEdit.Hide();
+				Editing = false;
 			}
 			RefreshUi();
 		}
@@ -55,30 +84,34 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 
 	public void ResetUi()
 	{
-		GD.Print("Reset UI");
 		OscPathEdit.Text = "";
 		ConditionMenuSelect.Selected = 0;
 		ThresholdEdit.Text = "";
 	}
 
-	public void OnTextSubmitted(String newText)
+	public void OnThresholdSubmitted(String newText)
 	{
-		GD.Print("On Text Submitted");
 		bool parsed = Single.TryParse(
 			newText,
 			System.Globalization.NumberStyles.Number,
 			CultureInfo.InvariantCulture,
-			out float _);
+			out float parsedValue);
 
 		if (!parsed)
 		{
 			ThresholdEdit.Text = CurrentResource.Condition.Threshold.ToString();
 		}
+		else
+		{
+			if (Editing)
+			{
+				ThresholdValidated(parsedValue);
+			}
+		}
 	}
 
 	public bool SaveValues()
 	{
-		GD.Print("Save Values");
 		string thresholdText = ThresholdEdit.Text;
 		bool parsed = Single.TryParse(
 			thresholdText,
@@ -102,14 +135,16 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 
 	public void RefreshUi()
 	{
-		GD.Print("Refresh UI");
 		ResetUi();
 		OscActionConditionResource condition = CurrentResource.Condition;
 
 		OscPathEdit.Text = condition.Path;
 		ConditionMenuSelect.Selected = (int)condition.Condition;
 		ThresholdEdit.Text = condition.Threshold.ToString(CultureInfo.InvariantCulture);
-		GD.Print($"{condition.Path} - {condition.Threshold}");
+		bool isLongPress = CurrentResource.Type == UserDefinedLocationClickerResource.ClickerType.Long;
+		PressTime.Editable = isLongPress;
+		LongPressCheck.SetPressedNoSignal(isLongPress);
+		PressTime.SetValueNoSignal(CurrentResource.PressTime);
 	}
 
 	public void OnAddButtonClicked()
@@ -131,7 +166,6 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 
 	public void CurrentSelectionChanged(UserDefinedLocationClickerResource resource)
 	{
-		GD.Print("CurrentSelectionChanged");
 		if (resource == null)
 		{
 			CurrentResource = null;
@@ -146,6 +180,69 @@ public partial class UserDefinedLocationClickerConditionEditor : VBoxContainer
 	{
 		ButtonAdd.Pressed += OnAddButtonClicked;
 		ButtonEdit.Pressed += OnEditButtonClicked;
+	}
+
+	OscActionConditionResource CurrentCondition()
+	{
+		if (currentResource == null) return null;
+		return currentResource.Condition;
+	}
+
+	void SubmitChangesIfEditing()
+	{
+		if (Editing)
+		{
+			EmitSignal(SignalName.ValuesEdited, CurrentResource);
+		}
+	}
+
+	public void PathChangeSubmitted(string newPath)
+	{
+		var condition = CurrentCondition();
+		if (condition == null) return;
+
+		condition.Path = newPath;
+		SubmitChangesIfEditing();
+
+	}
+
+	public void ConditionChanged(int newCondition)
+	{
+		var condition = CurrentCondition();
+		if (condition == null) return;
+
+		condition.Condition = (OscActionConditionEnum)ConditionMenuSelect.Selected;
+		SubmitChangesIfEditing();
+	}
+
+	public void ThresholdValidated(float threshold)
+	{
+		var condition = CurrentCondition();
+		if (condition == null) return;
+
+		condition.Threshold = threshold;
+		SubmitChangesIfEditing();
+	}
+
+	public void LongTimeCheckChanged(bool check)
+	{
+		PressTime.Editable = check;
+		SaveTimings();
+	}
+
+	public void LongTimeDefined(float value)
+	{
+		SaveTimings();
+	}
+
+	void SaveTimings()
+	{
+		currentResource.Type = (
+			LongPressCheck.ButtonPressed
+			? UserDefinedLocationClickerResource.ClickerType.Long
+			: UserDefinedLocationClickerResource.ClickerType.Instant);
+		CurrentResource.PressTime = (float)PressTime.Value;
+		SubmitChangesIfEditing();
 	}
 }
 

@@ -59,19 +59,15 @@ public partial class MainApp : Control
 			return true;
 		}
 
-		GD.Print("StartAppBeforeLoad");
 		UserMainSettingsResource settings = LoadSettings();
-		GD.Print("StartAppAfterLoad");
 		if (settings == null)
 		{
-			GD.Print("Could not load the settings from the disk");
 			CreateSaveFile();
 			settings = LoadSettings();
 		}
 
 		if (settings == null || !settings.AdbAppearUseable())
 		{
-			GD.Print("Could not load the settings !");
 			if (settings == null)
 			{
 				GD.Print("Settings are still null");

@@ -21,25 +21,27 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 	[Export]
 	public ScaledTextureRect PhoneScreen { get; set; }
 
-	bool Moving {get; set;} = false;
-	Vector2 PhoneScreenPosition {get; set;} = Vector2.Zero;
-	Viewport ViewPort {get; set;} = null;
+	bool Moving { get; set; } = false;
+	Vector2 PhoneScreenPosition { get; set; } = Vector2.Zero;
+	Viewport ViewPort { get; set; } = null;
 
 	Vector2 Limits { get; set; } = Vector2.Zero;
 	Vector2 HalfSize { get; set; } = Vector2.Zero;
 
 	void ReloadResource()
 	{
-		Color = CurrentClickerSettings.Color;
 		Vector2 scaledPosition = CurrentClickerSettings.Position * PhoneScreen.CurrentScale;
-		Limits = PhoneScreen.Size - Size;
-		GD.Print($"[Clicker Setter] Position : {CurrentClickerSettings.Position} * {PhoneScreen.CurrentScale} = {scaledPosition}");
+		Vector2 limits = PhoneScreen.Size - Size;
+		limits.X = Mathf.Max(0f, limits.X);
+		limits.Y = Mathf.Max(0f, limits.Y);
+
+		Color = CurrentClickerSettings.Color;
+		Limits = limits;
 		Position = ClampPositionToParent(scaledPosition);
 	}
 
 	public Vector2 ClampPositionToParent(Vector2 pos)
 	{
-		GD.Print($"Clamping between {Vector2.Zero} and {Limits}");
 		return pos.Clamp(Vector2.Zero, Limits);
 	}
 
@@ -61,7 +63,6 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 
 	public void OnGuiEvent(InputEvent @event)
 	{
-		GD.Print("Mouse event !");
 		InputEventMouseButton mouseButtonEvent = @event as InputEventMouseButton;
 		if (mouseButtonEvent != null)
 		{
@@ -90,13 +91,11 @@ public partial class UserDefinedOscClickerSetter : ColorRect
 	{
 		if (resource == null)
 		{
-			GD.Print("[UserDefinedOscClickerSetter] SelectedClickerChanged - Display null !");
 			Visible = false;
 			CurrentClickerSettings = new UserDefinedLocationClickerResource();
 		}
 		else
 		{
-			GD.Print("[UserDefinedOscClickerSetter] SelectedClickerChanged - Display Not Null !");
 			Visible = true;
 			CurrentClickerSettings = resource;
 		}

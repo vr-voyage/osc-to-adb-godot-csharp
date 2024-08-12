@@ -29,7 +29,6 @@ namespace AdbGodotSharp
 
         public bool IsConditionMet(OscActionConditionResource condition)
         {
-            GD.Print("Condition Met");
             string oscPath = condition.Path;
             if (!HasValue(oscPath)) return false;
 

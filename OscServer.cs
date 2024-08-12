@@ -2,6 +2,9 @@ using AdbGodotSharp;
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+
 public partial class OscServer : Control
 {
 	delegate Variant OscPartParser(byte[] packet, int cursor);
@@ -16,7 +19,15 @@ public partial class OscServer : Control
 	public delegate void OscValuesUpdatedEventHandler(OscValuesRead values);
 
 	UdpServer Server { get; set; } = new UdpServer();
+	UdpClient Client { get; set; } = new UdpClient(9001);
+	IPEndPoint groupEP = new IPEndPoint(IPAddress.Any.Address, 9001);
+
 	PacketPeerUdp peer;
+
+	public override void _Ready()
+	{
+		GetWindow().CloseRequested += Terminate;
+	}
 
 	void Log(string message)
 	{
@@ -26,21 +37,24 @@ public partial class OscServer : Control
 
 	public void StartServer()
 	{
-		Server ??= new UdpServer();
+		/*Server ??= new UdpServer();
 
 		if (Server.Listen(9001, "127.0.0.1") != Error.Ok)
 		{
 			Log("Could not listen on port 9001");
 			StopServer();
 			return;
-		}
+		}*/
 
 		SetProcess(true);
 	}
 
 	public void StopServer()
 	{
-		Server?.Stop();
+		
+		Client?.Close();
+		Client?.Dispose();
+		Client = null;
 		SetProcess(false);
 	}
 
@@ -53,19 +67,22 @@ public partial class OscServer : Control
 	{
 		if (what == NotificationWMCloseRequest)
 		{
-			StopServer();
+			Terminate();
+
 		}
 	}
 
-	public override void _ExitTree()
+	void Terminate()
 	{
 		StopServer();
+		GD.Print("[OscClient] Termination of UDP Client");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if (!Server.IsListening())
+		if (Client == null) return;
+		/*if (!Server.IsListening())
 		{
 			Log("Server not listening");
 			SetProcess(false);
@@ -80,16 +97,16 @@ public partial class OscServer : Control
 		{
 			peer = Server.TakeConnection();
 			return;
-		}
+		}*/
 
 		bool dirty = false;
-		byte[] packet =peer.GetPacket();
+		
+			//peer.GetPacket();
 
-		while (packet != null && packet.Length != 0)
+		while (Client.Available > 0)
 		{
+			byte[] packet = Client.Receive(ref groupEP);
 			ParseOscPacket(packet);
-
-			packet = peer.GetPacket();
 			dirty = true;
 		}
 		
@@ -205,7 +222,7 @@ public partial class OscServer : Control
 
 		if (type.Length < ",x".Length)
 		{
-			GD.Print($"Unknown type {type} for {oscPath}");
+			GD.Print($"[OscClient] Unknown type {type} for {oscPath}");
 		}
 
 		char oscType = type[1];

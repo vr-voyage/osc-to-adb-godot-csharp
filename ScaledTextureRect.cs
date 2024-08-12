@@ -22,6 +22,12 @@ public partial class ScaledTextureRect : TextureRect
 		StretchMode = TextureRect.StretchModeEnum.Scale;
 
 		CustomMinimumSize = textureSize * proportionalScale;
+		if (Texture != null)
+		{
+			var oldTexture = Texture;
+			Texture = null;
+			oldTexture.Free();
+		}
 		Texture = newTexture;
 
 		CurrentScale = proportionalScale;

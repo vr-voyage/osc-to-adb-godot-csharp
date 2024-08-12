@@ -8,13 +8,15 @@
 [ext_resource type="StyleBox" uid="uid://dwbqgg6c8m5ab" path="res://style_button_edit_hover.tres" id="5_2pipa"]
 [ext_resource type="StyleBox" uid="uid://bvphimrmugqlt" path="res://style_button_edit_pressed.tres" id="6_n22h2"]
 
-[node name="VBoxContainer" type="VBoxContainer" node_paths=PackedStringArray("OscPathEdit", "ConditionMenuSelect", "ThresholdEdit", "ButtonAdd", "ButtonEdit")]
+[node name="VBoxContainer" type="VBoxContainer" node_paths=PackedStringArray("OscPathEdit", "ConditionMenuSelect", "ThresholdEdit", "ButtonAdd", "ButtonEdit", "LongPressCheck", "PressTime")]
 script = ExtResource("1_hqyjk")
 OscPathEdit = NodePath("LineEdit")
 ConditionMenuSelect = NodePath("HBoxContainer/MenuButton")
 ThresholdEdit = NodePath("HBoxContainer/LineEdit")
 ButtonAdd = NodePath("AddButton")
 ButtonEdit = NodePath("EditButton")
+LongPressCheck = NodePath("Control/CheckBox")
+PressTime = NodePath("Control/SpinBox")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 2
@@ -49,9 +51,20 @@ layout_mode = 2
 size_flags_horizontal = 3
 virtual_keyboard_type = 2
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+
+[node name="CheckBox" type="CheckBox" parent="Control"]
+layout_mode = 2
+text = "Long press"
+
+[node name="SpinBox" type="SpinBox" parent="Control"]
+layout_mode = 2
+max_value = 20.0
+step = 0.1
+value = 1.0
+editable = false
 
 [node name="AddButton" type="Button" parent="."]
 layout_mode = 2
@@ -71,3 +84,9 @@ theme_override_styles/hover = ExtResource("5_2pipa")
 theme_override_styles/pressed = ExtResource("6_n22h2")
 theme_override_styles/focus = ExtResource("6_n22h2")
 text = "Edit"
+
+[connection signal="text_submitted" from="LineEdit" to="." method="PathChangeSubmitted"]
+[connection signal="item_selected" from="HBoxContainer/MenuButton" to="." method="ConditionChanged"]
+[connection signal="text_submitted" from="HBoxContainer/LineEdit" to="." method="OnThresholdSubmitted"]
+[connection signal="toggled" from="Control/CheckBox" to="." method="LongTimeCheckChanged"]
+[connection signal="value_changed" from="Control/SpinBox" to="." method="LongTimeDefined"]

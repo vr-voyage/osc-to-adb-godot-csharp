@@ -40,7 +40,6 @@ public partial class AdbHandler : Control
 	List<ThreadData> RunningThreads { get; set; } = new List<ThreadData>(32);
 	List<ThreadData> ThreadsToRemove { get; set; } = new List<ThreadData>(32);
 	//ThreadData currentThreadData = null;
-	
 
 	double nextCheck = 1.0;
 
@@ -53,7 +52,7 @@ public partial class AdbHandler : Control
 
 	public static void TakeScreenshot(object localDataUncasted)
 	{
-		GD.Print("Taking screenshot !");
+		GD.Print("[AdbHandler] Taking screenshot !");
 		ThreadData localData = (ThreadData)localDataUncasted;
 		StartAdb(localData);
 		localData.output = CopyAdbOutput(localData);
@@ -96,8 +95,11 @@ public partial class AdbHandler : Control
 
 		foreach (var threadToRemove in threadsToRemove)
 		{
+			threadToRemove?.currentProcess?.Close();
+			threadToRemove?.currentProcess?.Dispose();
 			RunningThreads.Remove(threadToRemove);
 		}
+		ThreadsToRemove.Clear();
 		
 	}
 
@@ -133,7 +135,7 @@ public partial class AdbHandler : Control
 		Godot.Error ret = image.LoadPngFromBuffer(screenshotData);
 		if (ret != Error.Ok)
 		{
-			ShowStatus("Could not load image !");
+			ShowStatus("[AdbHandler] Could not load image !");
 			return;
 		}
 		screenOutput.ApplyAndScaleTexture(ImageTexture.CreateFromImage(image));
@@ -146,7 +148,7 @@ public partial class AdbHandler : Control
 	{
 		if (MainSettings == null)
 		{
-			ShowStatus("No useable settings !");
+			ShowStatus("[AdbHandler] No useable settings !");
 			return;
 		}
 
@@ -154,7 +156,7 @@ public partial class AdbHandler : Control
 
 		if (adbPath == null || adbPath.Trim().Length == 0)
 		{
-			ShowStatus("ADB Path is not set !");
+			ShowStatus("[AdbHandler] ADB Path is not set !");
 			return;
 		}
 
@@ -180,9 +182,19 @@ public partial class AdbHandler : Control
 		_ClickScreenAdb((int)screenPosition.X, (int)screenPosition.Y);
 	}
 
+	public void LongClickTriggered(Vector2 screenPosition, float time)
+	{
+		_LongClickScreenAdb((int)screenPosition.X, (int)screenPosition.Y, (int)(time * 1000));
+	}
+
 	private void _ClickScreenAdb(int x, int y)
 	{
 		_InvokeAdb($"shell input tap {x} {y}", AdbHandler.ClickScreen, ThreadType.AdbClick);
+	}
+
+	private void _LongClickScreenAdb(int x, int y, int time)
+	{
+		_InvokeAdb($"shell input swipe {x} {y} {x} {y} {time}", AdbHandler.ClickScreen, ThreadType.AdbClick);
 	}
 
 	public static void ClickScreen(Object localDataUncasted)
@@ -203,21 +215,23 @@ public partial class AdbHandler : Control
 		{
 			MainSettings = settings;
 			SetProcess(true);
-			ShowStatus("ADB configuration provided");
+			ShowStatus("[AdbHandler] ADB configuration provided");
 		}
 		else
 		{
 			SetProcess(false);
-			ShowStatus("No useable configuration for ADB");
+			ShowStatus("[AdbHandler] No useable configuration for ADB");
 		}
 	}
 
 	public override void _Ready()
 	{
+		GetWindow().CloseRequested += Termination;
+
 		if (MainSettings == null)
 		{
 			SetProcess(false);
-			ShowStatus("No useable configuration for ADB");
+			ShowStatus("[AdbHandler] No useable configuration for ADB");
 		}
 	}
 
@@ -239,9 +253,10 @@ public partial class AdbHandler : Control
 
 	void Termination()
 	{
+		GD.Print("[AdbHandler] Starting to terminate ADB clients");
 		KillCurrentProcess();
 		KillAnyAdb();
-
+		GD.Print("[AdbHandler] ADB Clients Terminated !");
 	}
 
 	public override void _Notification(int what)
@@ -250,11 +265,6 @@ public partial class AdbHandler : Control
 		{
 			Termination();
 		}
-	}
-
-	public override void _ExitTree()
-	{
-		Termination();
 	}
 
 }

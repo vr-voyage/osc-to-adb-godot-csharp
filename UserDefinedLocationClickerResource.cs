@@ -11,8 +11,17 @@ namespace AdbGodotSharp
 {
 	public partial class UserDefinedLocationClickerResource : Resource
 	{
+		public enum ClickerType
+		{
+			Instant,
+			Long
+		};
+
 		[Export]
-		public bool Enabled { get; set; }
+		public ClickerType Type { get; set; } = ClickerType.Instant;
+
+		[Export]
+		public bool Enabled { get; set; } = false;
 
 		[Export]
 		public OscActionConditionResource Condition { get; set; } = new OscActionConditionResource();
@@ -21,7 +30,10 @@ namespace AdbGodotSharp
 		public Color Color { get; set; } = RandomColor();
 
 		[Export]
-		public Vector2 Position { get; set; }
+		public Vector2 Position { get; set; } = Vector2.Zero;
+
+		[Export]
+		public float PressTime { get; set; } = 1.0f;
 
 		public bool ConditionMetOnLastCheck = false;
 
@@ -38,10 +50,12 @@ namespace AdbGodotSharp
 		{
 			var manualSerialization = new Godot.Collections.Dictionary<string, Variant>()
 			{
+				{ "Type", (int)Type },
 				{ "Enabled", Enabled },
 				{ "Condition", Condition.Serialize() },
 				{ "Color", Color.Serialize() },
-				{ "Position", Position.Serialize() }
+				{ "Position", Position.Serialize() },
+				{ "PressTime", PressTime }
 			};
 			return manualSerialization;
 		}
@@ -65,14 +79,28 @@ namespace AdbGodotSharp
 			bool isEnabled = (bool)serializedData["Enabled"];
 			GD.Print($"Is Enabled ? {isEnabled}");
 
+			ClickerType clickerType = ClickerType.Instant;
+			if (serializedData.ContainsKey("Type") && serializedData["Type"].VariantType == Variant.Type.Float)
+			{
+				clickerType = (ClickerType)(int)(float)serializedData["Type"];
+			}
+
+			float pressTime = 1.0f;
+			if (serializedData.ContainsKey("PressTime") && serializedData["PressTime"].VariantType == Variant.Type.Float)
+			{
+				pressTime = (float)serializedData["PressTime"];
+			}
 
 			return new UserDefinedLocationClickerResource()
 			{
+				Type = clickerType,
 				Enabled = (bool)serializedData["Enabled"],
 				Condition = actionCondition,
 				Color = ((Array<Variant>)serializedData["Color"]).ToColor(),
-				Position = ((Array<Variant>)serializedData["Position"]).ToVec2()
+				Position = ((Array<Variant>)serializedData["Position"]).ToVec2(),
+				PressTime = pressTime
 			};
 		}
     }
+
 }

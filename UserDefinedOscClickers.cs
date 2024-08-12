@@ -19,6 +19,9 @@ public partial class UserDefinedOscClickers : Control
 
 	[Signal]
 	public delegate void ClickTriggeredEventHandler(Vector2 vector);
+	
+	[Signal]
+	public delegate void LongClickTriggeredEventHandler(Vector2 vector, float timeSeconds);
 
 	[Export]
 	public string ClickersSaveDataPath { get; set; } = "user://clickers.json";
@@ -77,19 +80,16 @@ public partial class UserDefinedOscClickers : Control
 
 	void NotifySelectionChanged()
 	{
-		GD.Print("NotifySelectionChanged");
 		EmitSignal(SignalName.SelectionChanged, selectedDisplay?.ShownClicker);
 	}
 
 	public void DeselectCurrent()
 	{
-		GD.Print("DeselectCurrent");
 		selectedDisplay?.Deselected();
 	}
 
 	public void ChildDisplaySelected(UserDefinedLocationClickerDisplay newSelectedDisplay)
 	{
-		GD.Print("ChildDisplaySelected");
 		if (selectedDisplay == newSelectedDisplay) return;
 
 		selectedDisplay?.Deselect();
@@ -100,7 +100,6 @@ public partial class UserDefinedOscClickers : Control
 
 	public void ChildDisplayDeselected(UserDefinedLocationClickerDisplay deselectedDisplay)
 	{
-		GD.Print("ChildDisplayDeselected");
 		if (selectedDisplay == deselectedDisplay)
 		{
 			selectedDisplay = null;
@@ -112,23 +111,22 @@ public partial class UserDefinedOscClickers : Control
 
 	void RemoveChildren()
 	{
-		GD.Print("RemoveChildren");
 		var children = ListLocation.GetChildren();
 		int nChildren = children.Count;
 
 		for (int i = nChildren - 1; i >= 0; i--)
 		{
-			ListLocation.RemoveChild(children[i]);
+			var child = children[i];
+			ListLocation.RemoveChild(child);
+			child.QueueFree();
 		}
 	}
 
 	public void RefreshList()
 	{
 		var previouslySelectedClicker = selectedDisplay?.ShownClicker;
-		GD.Print("RefreshList");
 		RemoveChildren();
 		selectedDisplay = null;
-		GD.Print("Add Elements");
 		foreach (var locationClicker in OscClickers.LocationClickers)
 		{
 			var display = OscClickerDisplay.Instantiate<UserDefinedLocationClickerDisplay>();
@@ -170,7 +168,7 @@ public partial class UserDefinedOscClickers : Control
 
 	public void AddOrEditValue(string path, Variant value)
 	{
-		var children = ListLocation.GetChildren();
+		/*var children = ListLocation.GetChildren();
 		foreach (var child in children)
 		{
 			if (child is not UserDefinedLocationClickerDisplay)
@@ -189,7 +187,7 @@ public partial class UserDefinedOscClickers : Control
 				display.Selected();
 				return;
 			}
-		}
+		}*/
 
 		UserDefinedLocationClickerResource newClicker = new()
 		{
@@ -223,6 +221,7 @@ public partial class UserDefinedOscClickers : Control
 			NotifySelectionChanged();
 		}
 		var deleted = OscClickers.LocationClickers.Remove(clicker);
+		clicker.Free();
 
 		RefreshList();
 	}
@@ -251,7 +250,15 @@ public partial class UserDefinedOscClickers : Control
 		if (!clicker.ConditionMetOnLastCheck && conditionMetThisTime)
 		{
 			clicker.ConditionMetOnLastCheck = true;
-			EmitSignal(SignalName.ClickTriggered, clicker.Position);
+			if (clicker.Type == UserDefinedLocationClickerResource.ClickerType.Instant)
+			{
+				EmitSignal(SignalName.ClickTriggered, clicker.Position);
+			}
+			else
+			{
+				EmitSignal(SignalName.LongClickTriggered, clicker.Position, clicker.PressTime);
+			}
+			
 		}
 		else if (!conditionMetThisTime)
 		{
